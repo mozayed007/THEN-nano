@@ -487,12 +487,26 @@ class HybridTHENAttention(nn.Module):
             while state['buffer'].size(1) >= self.chunk_size:
                 chunk = state['buffer'][:, :self.chunk_size, :]
                 trace = torch.mean(chunk, dim=1)  # (B, D)
-                state['traces'].append(trace)
+                
+                # Check for Hardware-Native Memory Manager
+                if 'memory_manager' in state:
+                    state['memory_manager'].append(trace)
+                else:
+                    state['traces'].append(trace)
+                    
                 state['buffer'] = state['buffer'][:, self.chunk_size:, :]
                 
             return compressed, state
         else:  # DSA: Retrieve/abstract semantics
-            if state['traces']:  
+            # If using Hardware-Native NVMe streaming
+            if 'memory_manager' in state and state['memory_manager'].head > 0:
+                q_mem = self.dsa(x)
+                attn_out = state['memory_manager'].retrieve(q_mem)
+                fused = x + attn_out
+                return fused, state
+                
+            # Fallback legacy VRAM-only Python list traces
+            elif state.get('traces'):  
                 # [THEN] Attention Retrieval Logic (Fixes Memory Blurring)
                 # Stack traces: (B, N, D)
                 memory = torch.stack(state['traces'], dim=1)
@@ -501,8 +515,8 @@ class HybridTHENAttention(nn.Module):
                 q_mem = self.dsa(x)
                 
                 # Scaled Dot Product Attention: Q=q_mem, K=memory, V=memory
-                # Retrieves specific relevant traces instead of averaging all of them
                 attn_out = F.scaled_dot_product_attention(q_mem, memory, memory)
+
                 
                 # Simple fusion
                 fused = x + attn_out

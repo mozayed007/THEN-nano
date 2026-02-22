@@ -50,6 +50,7 @@ Instead of updating the neural network's parameters (which requires a massive GP
 2. **Zero Forgetting**: Since we don't touch the brain (weights), the model never forgets how to speak English or write code.
 3. **Privacy Control**: The "notebook" is just a file. You can delete specific pages (memories) or burn the whole book without affecting the model's core intelligence.
 4. **Low Cost**: You can serve 10,000 users with **one** frozen model and 10,000 small notebook files.
+5. **Universal Portability**: Implemented as PyTorch `forward_hooks`, the architecture natively wraps any HuggingFace model (Qwen, Llama, Mistral) transparently without invasive source-code modifications.
 
 ---
 *This architecture allows us to move from "Static Intelligence" to "Evolving Intelligence" without the massive compute costs of continuous training.*

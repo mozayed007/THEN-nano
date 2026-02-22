@@ -10,6 +10,8 @@ import torch
 import argparse
 from nanochat.tokenizer import get_tokenizer
 from nanochat.checkpoint_manager import build_model
+from nanochat.memory_manager import DiskTieredMemory
+from nanochat.engine import KVCache
 from nanochat.common import print0
 
 def query(args):
@@ -23,51 +25,69 @@ def query(args):
     model.eval()
 
     # 2. Load State
-    print0(f"Loading memory state from {args.state_path}...")
-    state = torch.load(args.state_path, map_location=device)
-    print0(f"Loaded state with {len(state.get('traces', []))} traces.")
+    print0(f"Loading memory stream from {args.state_path}...")
+    buffer_path = args.state_path.replace(".dat", "_buffer.pt")
+    
+    state = {}
+    if os.path.exists(buffer_path):
+        buffer_state = torch.load(buffer_path, map_location=device)
+        state['buffer'] = buffer_state.get('buffer', None)
+        
+    state['memory_manager'] = DiskTieredMemory(filepath=args.state_path, max_traces=100000, d_model=model.config.n_embd, device=device)
+    print0(f"Loaded disk state with {state['memory_manager'].head} traces.")
 
     # 3. Interactive Loop
     print0("\nReady for queries! (Type 'exit' to quit)")
     print0("-" * 50)
+    
+    m = model.config
+    dtype = torch.bfloat16 if device == "cuda" else torch.float32
+    kv_model_kwargs = {"num_heads": m.n_kv_head, "head_dim": m.n_embd // m.n_head, "num_layers": m.n_layer}
     
     while True:
         user_input = input("User: ")
         if user_input.lower() in ["exit", "quit"]:
             break
             
-        # Prepare input
-        # Note: We do NOT prepend BOS here if we assume this is a continuation
-        # But for a fresh query, BOS is usually good. Let's stick to standard encoding.
         tokens = tokenizer.encode(user_input, prepend="<|bos|>")
         tokens = torch.tensor(tokens, dtype=torch.long, device=device).unsqueeze(0)
         
-        # Generate
         print0("Assistant: ", end="", flush=True)
         
-        # We need a custom generate loop that passes 'state'
-        # The standard model.generate() in gpt.py is too simple (doesn't take state arg yet)
-        # So we write a simple one here or rely on forward()
-        
-        # For simplicity, let's just generate 20 tokens
-        curr_tokens = tokens
         with torch.inference_mode():
-            for _ in range(args.max_new_tokens):
-                # Forward with state
-                logits, _ = model(curr_tokens, state=state, return_state=True)
-                
-                # Greedy decode
+            # Create fresh KV cache for this turn
+            kv_cache = KVCache(
+                batch_size=1,
+                seq_len=m.sequence_len,
+                device=device,
+                dtype=dtype,
+                **kv_model_kwargs,
+            )
+            
+            # --- PREFILL ---
+            # Process the whole prompt to populate KV cache and memory state buffer
+            logits, state = model(tokens, state=state, kv_cache=kv_cache, return_state=True)
+            next_token = logits[:, -1, :].argmax(dim=-1, keepdim=True)
+            
+            decoded = tokenizer.decode(next_token[0].tolist())
+            print(decoded, end="", flush=True)
+            
+            # --- DECODE ---
+            # Autoregressive generation using only 1 token per pass 
+            # Fixes the O(T^2) duplicate token ingestion bug
+            curr_token = next_token
+            for _ in range(args.max_new_tokens - 1):
+                logits, state = model(curr_token, state=state, kv_cache=kv_cache, return_state=True)
                 next_token = logits[:, -1, :].argmax(dim=-1, keepdim=True)
                 
-                # Print token
                 decoded = tokenizer.decode(next_token[0].tolist())
                 print(decoded, end="", flush=True)
                 
-                # Append
-                curr_tokens = torch.cat([curr_tokens, next_token], dim=1)
+                curr_token = next_token
                 
-                if next_token.item() == tokenizer.eot_token_id: # Assuming EOT exists/is handled
+                if next_token.item() == tokenizer.eot_token_id:
                     break
+                    
         print("\n")
 
 if __name__ == "__main__":
