@@ -86,6 +86,8 @@ for flops in "${FLOPS_BUDGETS[@]}"; do
         LOG_FILE="$RESULTS_DIR/${TAG}_train.log"
 
         # Extract detailed parameter counts (for scaling law analysis with different conventions)
+        # Note: the log format is padded, e.g. "wte                     : 25,165,824"
+        # so we grep for "^key " (key at start of line followed by space) to avoid false matches
         PARAMS_WTE=$(grep "^wte " "$LOG_FILE" | tail -1 | grep -oP '[\d,]+' | tr -d ',')
         PARAMS_VE=$(grep "^value_embeds " "$LOG_FILE" | tail -1 | grep -oP '[\d,]+' | tr -d ',')
         PARAMS_LM=$(grep "^lm_head " "$LOG_FILE" | tail -1 | grep -oP '[\d,]+' | tr -d ',')
