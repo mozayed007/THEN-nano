@@ -7,7 +7,7 @@ Most Large Language Models (LLMs) suffer from **anterograde amnesia**.
 * **Training (Phase 1)**: They learn general knowledge (e.g., "The sky is blue").
 * **Inference (Chat)**: They cannot "learn" new things permanently. If you tell them "My name is Sarah," they only remember it for the duration of the context window. Once the chat closes or the window fills up, the information is gone forever.
 
-### Why Current Solutions Fail
+### Why Current Solutions Have Tradeoffs
 
 1. **SFT / Fine-Tuning**:
     * **The Mechanism**: Re-training the model's weights on new data.
@@ -15,10 +15,10 @@ Most Large Language Models (LLMs) suffer from **anterograde amnesia**.
 
 2. **RAG (Retrieval-Augmented Generation)**:
     * **The Mechanism**: Using a search engine (Vector DB) to find documents and pasting them into the prompt.
-    * **The Pain**: It is **disembodied**. The model doesn't "know" the memory; it just reads a text snippet you pasted.
-        * **No Intuition**: It can't form subconscious connections or "feel" the history.
-        * **Latency**: Requires an external database lookup and massive prompt stuffing.
-        * **Context Choking**: Pasting 10k words of history into the prompt makes the model slower, dumber, and wildly expensive per token.
+    * **The Pain**: It keeps memory outside the model's learned forward dynamics and can introduce latency and prompt budget pressure.
+        * **External Retrieval**: The model reads retrieved text rather than using a dedicated learned memory state.
+        * **Latency**: Requires a retrieval step and additional prompt construction.
+        * **Context Pressure**: Large retrieved histories compete for context window space and increase token cost.
 
 3. **Plugins / Tools**:
     * **The Mechanism**: Giving the model a "Save to File" tool.
@@ -47,10 +47,12 @@ Instead of updating the neural network's parameters (which requires a massive GP
 ### 3. Key Benefits
 
 1. **Instant Learning**: New facts are available immediately. No waiting for a training run.
-2. **Zero Forgetting**: Since we don't touch the brain (weights), the model never forgets how to speak English or write code.
-3. **Privacy Control**: The "notebook" is just a file. You can delete specific pages (memories) or burn the whole book without affecting the model's core intelligence.
-4. **Low Cost**: You can serve 10,000 users with **one** frozen model and 10,000 small notebook files.
-5. **Universal Portability**: Implemented as PyTorch `forward_hooks`, the architecture natively wraps any HuggingFace model (Qwen, Llama, Mistral) transparently without invasive source-code modifications.
-
+2. **Weight Stability**: Since the design writes to state rather than weights during ingestion, it avoids direct weight overwriting for new episodic information.
+3. **Privacy Control**: The "notebook" is just a file. In principle, you can delete specific pages (memories) or burn the whole book without changing the model's core weights.
+4. **Potential Cost Benefits**: If the mechanism works reliably, one frozen model could potentially serve many users with separate state files.
+5. **Portable Implementation Path**: The current prototype includes PyTorch `forward_hooks` intended to wrap standard HuggingFace models without invasive source-code modifications.
 ---
-*This architecture allows us to move from "Static Intelligence" to "Evolving Intelligence" without the massive compute costs of continuous training.*
+
+CURRENT STATUS (2026-04-28): The THEN architecture has been implemented as code modifications to nanochat with a portable hook-based path for HuggingFace models. All unit tests pass for mechanical plumbing. However, no model training has been executed — the architecture has not yet been shown to produce causal recall advantages in any benchmark. The `tiny_recall_benchmark.py` scaffold is the next step.
+
+*This architecture is intended as a path from static weights toward a more stateful form of personalization without continuous retraining, but its practical advantages still require controlled validation.*

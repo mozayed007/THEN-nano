@@ -9,11 +9,11 @@ The fundamental difference lies in **where** the new information is stored and *
 | Feature | Continued Pretraining / SFT | Live Memory (THEN) |
 | :--- | :--- | :--- |
 | **Storage Mechanism** | **Synaptic Weights** (Parameters) | **Episodic State** (Buffer/Cache) |
-| **Write Operation** | `loss.backward()` + Optimizer Step | `state['traces'].append()` |
+| **Write Operation** | `loss.backward()` + Optimizer Step | State writes during forward pass |
 | **Model Mode** | `model.train()` | `model.eval()` (Frozen) |
-| **Permanence** | Permanent (until overwritten) | Volatile (unless saved to disk) |
-| **Speed** | Slow (requires gradient calculation) | Instant (forward pass only) |
-| **Forgetting** | **Catastrophic Forgetting** (Old data lost) | **No Forgetting** (Additive state) |
+| **Permanence** | Persistent until later weight updates change behavior | Persistent only if saved and managed externally |
+| **Speed** | Slow (requires gradient calculation) | Potentially fast (forward-pass writes), but still requires validation in realistic settings |
+| **Forgetting / Interference** | Risk of overwriting prior behavior during updates | Avoids direct weight overwriting, but retrieval quality and memory management remain open questions |
 
 ---
 
@@ -52,17 +52,14 @@ The **THEN (Temporal History Episodic Network)** architecture treats memory as a
 In `HybridTHENAttention.forward`:
 
 ```python
-# SFT would update self.kda.weight here via backprop.
-# Live Memory instead does this:
-
 if layer_idx % (self.ratio + 1) < self.ratio:
-    # Compress input into a trace
     compressed = self.kda(x)
-    trace = torch.mean(compressed, dim=1)
-    
-    # WRITE to State (Instant Memory)
-    state['traces'].append(trace) 
-    
+    state['buffer'] = torch.cat([state['buffer'], compressed], dim=1)
+    while state['buffer'].size(1) >= self.chunk_size:
+        chunk = state['buffer'][:, :self.chunk_size, :]
+        trace = torch.mean(chunk, dim=1)
+        state['traces'].append(trace)
+        state['buffer'] = state['buffer'][:, self.chunk_size:, :]
     return compressed, state
 ```
 
@@ -70,7 +67,13 @@ if layer_idx % (self.ratio + 1) < self.ratio:
 
 * **Instant**: As soon as the user speaks, it is in the state. No training run required.
 * **Surgeon-Precise**: We can delete a specific memory by removing its trace from the list.
-* **Stable**: The core reasoning capabilities (weights) are never touched, so the model doesn't get "dumber" or forget language rules while learning new facts.
+* **Weight-Preserving**: The core reasoning weights are not directly updated during ingestion, which makes external memory easier to isolate and manage.
+
+## 4. Important Scope Note
+
+This comparison is architectural, not a benchmark claim.
+
+The current repository does **not** yet establish that Live Memory is empirically better than SFT or RAG on recall quality, robustness, or cost in real deployments. The current value of this comparison is to explain a different design direction: storing new information in external state instead of updating weights.
 
 ## Summary
 
@@ -79,4 +82,4 @@ if layer_idx % (self.ratio + 1) < self.ratio:
 | **Human Analogy** | **Brain Plasticity**: Physically rewiring neurons to learn a skill (slow, hard to reverse). | **Working Memory**: Writing a note in a notebook (fast, easy to edit). |
 | **Computer Analogy** | **Firmware Update**: Flashing the ROM. | **RAM/Disk Write**: Saving a file. |
 
-**Your "Live Memory" is a dynamic, stateful buffer that the model learns to read/write to, whereas SFT is physically changing the model's brain.**
+**Live Memory is best understood here as a dynamic, stateful buffer that the model may learn to read and write to, whereas SFT updates the model's parameters directly.**

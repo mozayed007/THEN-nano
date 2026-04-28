@@ -1,5 +1,7 @@
 # Live Memory Evaluation Strategy
 
+> **STATUS 2026-04-28:** Mechanical smoke tests pass (state plumbing, disk I/O, import chains). No training or recall evaluation has been run. Functional and coherence tests are scaffolded but unexecuted. THENGPT weights are random. All test results come from untrained (random-weight) models.
+
 This document outlines the testing and evaluation procedures for the Live Memory "Ingest, Don't Train" workflow.
 
 ## 1. Mechanical Verification
@@ -45,6 +47,6 @@ python -m tests.test_live_memory
 
 ## Current Status
 
-- **Mechanical Verification:** Implemented and passing (`tests/test_live_memory.py`).
-- **Data Coherence:** Implemented in `dev/gen_cairo_data.py` (persistent user state).
-- **Recall Accuracy:** Pending full pretraining of the `THENGPT` model.
+- **Mechanical Verification:** Code implemented and smoke tests passing (`tests/test_live_memory.py`). "Passing" means the code does not crash on random weights — it validates state plumbing, save/load round-trips, and import chains. It does NOT validate that the memory mechanism actually works. These are mechanical smoke tests, not functional memory tests.
+- **Data Coherence:** Implemented in `dev/gen_cairo_data.py` (persistent user state). Code-level only; no training run has consumed this data.
+- **Recall Accuracy:** Pending full pretraining of the `THENGPT` model. Not yet executed.

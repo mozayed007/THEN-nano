@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-The **Live Memory (THEN)** project implements a novel "Ingest, Don't Train" architecture to solve catastrophic forgetting. While the **Phase 1 (Pretrain) → Phase 2 (Ingest) → Phase 3 (Query)** workflow is conceptually sound and superior to SFT for episodic memory, the current implementation faces significant scalability and training alignment hurdles.
+The **Live Memory (THEN)** project implements a novel "Ingest, Don't Train" architecture aimed at reducing reliance on retraining for episodic updates. While the **Phase 1 (Pretrain) → Phase 2 (Ingest) → Phase 3 (Query)** workflow is conceptually sound, the current implementation still faces significant scalability, training-alignment, and validation hurdles.
 
 ## Critical Analysis
 
@@ -32,15 +32,17 @@ The **Live Memory (THEN)** project implements a novel "Ingest, Don't Train" arch
 
 ## Roadmap & Next Stages
 
-### Stage 1: Stateful Pretraining (COMPLETED)
+> **Update 2026-04-28:** All stages refer to code implementation only. No model has been trained. The training pipeline has never been executed. THENGPT weights are random. All "fixes" are code-level only, not empirically proven.
+
+### Stage 1: Stateful Pretraining (CODE WRITTEN, NOT TRAINED)
 
 We must modify the pretraining loop to simulate the "Live Memory" condition.
 
 * **Action:** Implement **Truncated Backpropagation Through Time (TBPTT)** or simply pass the `state` dictionary from Batch $N$ to Batch $N+1$ when training on long documents.
 * **Objective:** Force the model to recall information from the *previous* batch (which is now in `state`) to predict tokens in the *current* batch.
-* **Status:** **Implemented** in `scripts/base_train.py` (2026-02-13). State is now persisted across training steps and detached to manage gradients.
+* **Status:** Code exists in `scripts/base_train.py` (2026-02-13). State persistence and gradient detachment are implemented in code. **Zero training steps have been run. The model weights are random.**
 
-### Stage 2: Scalable Memory Infrastructure (Hardware-Native)
+### Stage 2: Scalable Memory Infrastructure (Hardware-Native) — NOT STARTED
 
 We will reject external Vector DBs and plugins to maintain a pure, zero-dependency architecture. We will manage the memory hierarchy directly, treating the OS and hardware as the database.
 
@@ -53,18 +55,18 @@ We will reject external Vector DBs and plugins to maintain a pure, zero-dependen
   * **OS Paging:** Rely on the operating system's virtual memory management (via `mmap`) to handle caching of large trace files transparently.
   * **Zero-Copy:** Use zero-copy tensor views to read from disk directly into tensor processing.
 
-### Stage 3: Mechanism-Specific Tasks
+### Stage 3: Mechanism-Specific Tasks — NOT STARTED
 
 Train on tasks that explicitly require memory, not just generic text.
 
 * **Task:** "Passkey Retrieval" (Hide a key at $t=0$, ask for it at $t=10000$).
 * **Task:** "Personality Consistency" (Reward the model for maintaining consistent preferences over long contexts).
 
-### Stage 4: Real-World Deployment
+### Stage 4: Real-World Deployment — NOT STARTED
 
 * **Privacy:** Since memory is a file (`state.pt`), we can offer "Incognito Mode" (don't save traces) or "Memory Wipe" (delete file) features trivially.
-* **Personalization:** Serve thousands of users with *one* frozen model and thousands of tiny state files.
+* **Personalization:** If the mechanism is validated and the storage path is reliable, one frozen model could potentially serve many users with separate state files.
 
 ## Conclusion
 
-The project has high potential to disrupt the "Retrain for every update" paradigm, but currently exists as a **mechanical prototype**. It validates the *flow* (Ingest/Query) but has not yet validated the *learning* (Can it actually use the memory?). The next step is to bridge the gap between generic pretraining and stateful inference.
+The project has strong potential as an alternative architecture for stateful personalization, but it currently exists as a **mechanical prototype**. It validates the *flow* (Ingest/Query) more than the *learning* (Can it actually use the memory?). The next step is to bridge the gap between generic pretraining and stateful inference with controlled benchmarks and ablations.

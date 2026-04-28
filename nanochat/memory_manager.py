@@ -1,4 +1,5 @@
 import os
+import json
 import torch
 import torch.nn.functional as F
 import numpy as np
@@ -15,6 +16,7 @@ class DiskTieredMemory:
     """
     def __init__(self, filepath: str, max_traces: int = 100_000, d_model: int = 768, dtype=np.float32, device: str = "cuda"):
         self.filepath = filepath
+        self.meta_path = f"{filepath}.meta.json"
         self.max_traces = max_traces
         self.d_model = d_model
         self.dtype = dtype
@@ -25,15 +27,45 @@ class DiskTieredMemory:
         self.shape = (max_traces, d_model)
         
         # Create or attach to memmap
+        created = False
         if not os.path.exists(filepath):
             # Explicitly create an empty file of exact size before memmapping
             with open(filepath, "wb") as f:
                 f.seek((max_traces * d_model * np.dtype(dtype).itemsize) - 1)
                 f.write(b'\0')
+            created = True
         
         # Load memmap
         self.memmap = np.memmap(filepath, dtype=dtype, mode='r+', shape=self.shape)
-        
+        self._load_metadata()
+        if created:
+            self._persist_metadata()
+
+    def _persist_metadata(self):
+        with open(self.meta_path, "w", encoding="utf-8") as f:
+            json.dump({
+                "head": int(self.head),
+                "max_traces": int(self.max_traces),
+                "d_model": int(self.d_model),
+                "dtype": np.dtype(self.dtype).name,
+            }, f)
+
+    def _load_metadata(self):
+        if not os.path.exists(self.meta_path):
+            return
+        with open(self.meta_path, "r", encoding="utf-8") as f:
+            metadata = json.load(f)
+        if int(metadata.get("max_traces", self.max_traces)) != self.max_traces:
+            raise ValueError(f"Memory metadata max_traces mismatch for {self.filepath}")
+        if int(metadata.get("d_model", self.d_model)) != self.d_model:
+            raise ValueError(f"Memory metadata d_model mismatch for {self.filepath}")
+        if metadata.get("dtype", np.dtype(self.dtype).name) != np.dtype(self.dtype).name:
+            raise ValueError(f"Memory metadata dtype mismatch for {self.filepath}")
+        head = int(metadata.get("head", 0))
+        if head < 0 or head > self.max_traces:
+            raise ValueError(f"Invalid memory head {head} for {self.filepath}")
+        self.head = head
+
     def append(self, trace: torch.Tensor):
         """
         Append a single trace or batch of traces (B, T, D) safely to disk.
@@ -56,9 +88,10 @@ class DiskTieredMemory:
             trace = trace[:num_new]
             
         # Move back to CPU numpy and write straight into memmap
-        trace_np = trace.detach().cpu().to(torch.float32).numpy()
+        trace_np = trace.detach().cpu().to(torch.float32).numpy().astype(self.dtype, copy=False)
         self.memmap[self.head : self.head + num_new] = trace_np
         self.head += num_new
+        self._persist_metadata()
 
     def retrieve(self, query: torch.Tensor, top_k: int = 64, chunk_size: int = 4096) -> torch.Tensor:
         """
@@ -139,7 +172,9 @@ class DiskTieredMemory:
     def save(self):
         """Memmap flushes automatically, but explicitly calling ensures os sync."""
         self.memmap.flush()
+        self._persist_metadata()
 
     def reload(self):
         """Updates internal views if file changed externally."""
         self.memmap = np.memmap(self.filepath, dtype=self.dtype, mode='r+', shape=self.shape)
+        self._load_metadata()
