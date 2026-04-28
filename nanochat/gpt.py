@@ -241,6 +241,11 @@ class GPT(nn.Module):
         self.smear_lambda.fill_(0.0)
         self.backout_lambda.fill_(0.2)
 
+        # Smear/backout scalars and smear gate must be explicitly initialized 
+        torch.nn.init.zeros_(self.smear_lambda)
+        torch.nn.init.constant_(self.backout_lambda, 0.2)
+        torch.nn.init.uniform_(self.smear_gate.weight, 0.0, 0.02)
+
         # Value embeddings (init like c_v: uniform with same std)
         for ve in self.value_embeds.values():
             torch.nn.init.uniform_(ve.weight, -s, s)
