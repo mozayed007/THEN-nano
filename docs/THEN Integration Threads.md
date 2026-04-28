@@ -6,7 +6,7 @@
 - **Consolidated Structure**: This document merges placeholder content from Threads 3, 8, and 12 into a unified guide for the AI Live Memory project, focusing on the Temporal-Hippocampal Embedding Network (THEN) with hybrid attention (Option C: Layer-wise Interleaving). It adds a practical training section for prototyping on Kaggle GPUs, ensuring model-agnostic scalability and anti-amnesia features.
 - **Obsidian Optimization**: All diagrams use Mermaid for native rendering; code blocks are executable; tags and links are preserved for vault integration. Estimated prep time: 6 hours total across sections.
 - **Core Enhancements**: Emphasizes hippocampal simulations (episodic/semantic memory), feedback loops, and benchmarks targeting 25-40% retention gains over baselines like DeepSeek-V3.2.
-- **Next Steps**: Import as a single .md file; link to related docs (e.g., [Project Report - THEN](Project Report - THEN.md)). Iterate based on thread feedback for feasibility.
+- **Next Steps**: Link to related docs (e.g., [Live Memory Master Plan](Live%20Memory.md), [THEN Architecture Guide](concepts/then_architecture_public.md)). Iterate based on thread feedback for feasibility.
 
 ## Project Overview
 The AI Live Memory system integrates THEN as a memory augmentation layer for LLMs/VLMs, simulating hippocampal/MTL functions via interleaved KDA/DSA attention. This guide covers high-level architecture (Thread 3), implementation prototypes (Thread 8), evaluation metrics (Thread 12), and hardware-efficient training (Nano-THEN on Kaggle). It builds on modular abstractions, internal storage (no external DBs), and continuous learning loops, aligned with 2026 trends like MoE in Qwen3-235B.
@@ -15,7 +15,7 @@ The AI Live Memory system integrates THEN as a memory augmentation layer for LLM
 **Date**: February 08, 2026 (Updated from placeholders)  
 **Version**: 2.0 (Restructured for Obsidian)  
 **Obsidian Tags**: #AILiveMemory #THEN #Architecture #Prototypes #Evaluation #Training  
-**Related Docs**: [General_old.md](General_old.md), [Project Report - THEN](Project Report - THEN.md), [Thread 3 Diagrams](Thread3.md) (legacy)  
+**Related Docs**: [Live Memory Master Plan](Live%20Memory.md), [GPT-2 Phase](GPT-2%20Phase.md), [THEN Architecture Guide](concepts/then_architecture_public.md)  
 **Status**: Refined placeholders; ready for thread discussions and prototyping.
 
 ---
@@ -29,7 +29,7 @@ This section visualizes THEN's integration, refining core flows from prior docs.
 - **Alignment**: Matches sparse MoE architectures; enhances vanilla transformers against amnesia.
 
 ### Review of Existing Diagrams
-From [General_old.md](General_old.md):  
+From the original design documents (Obsidian vault, not in this repository):  
 - **Core Abstractions**: Intelligence Layer → Memory System → Data Flow → External.  
 - **Ecosystem**: LLM integrations → Interface → Storage (VDB/GDB/KVS/TS).  
 - **Sequence**: Inference cycles and batch processing.
@@ -439,7 +439,7 @@ The framework emphasizes internal, model-agnostic storage subspaces (episodic, s
 - **Author**: Muhammad Z. Ahmed (@MoZayed007).  
 - **Update Date**: February 08, 2026.  
 - **Version**: 2.0 (Integrated and Restructured).  
-- **Context**: Builds on [General_old.md](General_old.md) and [Project Report - THEN](Project Report - THEN.md); focuses on modularity for VLM multimodal extensions.  
+- **Context**: Builds on original design documents from the Obsidian vault; focuses on modularity for VLM multimodal extensions.  
 - **Tags**: #AILiveMemory #THEN #HybridAttention #HippocampalSimulation #ObsidianVault.  
 - **Status**: Actionable blueprint; refine via thread feedback for production prototypes.
 
@@ -449,7 +449,7 @@ This survey expands on the direct overview by delving into granular details, inc
 Architectural design in AI systems must balance expressivity, efficiency, and biological plausibility. Thread 3's placeholders provide a scaffold for visualizing THEN's role as a "memory bridge," injecting stateful traces into the LLM's context window via gated fusion. This section unpacks the diagrams, their evolutions, and theoretical underpinnings.
 
 ### Historical Review and Gap Analysis
-Prior diagrams in [General_old.md](General_old.md) established foundational modularity:  
+Prior original design documents (Obsidian vault, not in this repository) established foundational modularity:  
 - **Core Abstractions Graph**: A directed acyclic graph (DAG) from Intelligence Layer (LLM core) to External interfaces, with bidirectional Data Flow for feedback.  
 - **Ecosystem Overview**: Hierarchical connections from foundation models (e.g., open-source LLMs) to storage backends (Vector DBs, Graph DBs, Key-Value Stores, Time-Series).  
 - **Sequence Flows**: Temporal depictions of inference-update cycles, including batch salience sampling.  

@@ -44,7 +44,7 @@ A reader arriving fresh would believe training had run and the architecture had 
 
 ### 1. `run_all.py` — Single-Command Validation Runner
 
-Added: `scripts/run_all.py`
+Added: `run_all.py` (project root)
 
 What it does:
 
@@ -53,11 +53,11 @@ What it does:
 - Invokes the benchmark if tests pass
 - Produces a summary report to stdout and a log file
 
-Intent: a new contributor or reviewer can run `python scripts/run_all.py` and get a complete picture of project health in one command.
+Intent: a new contributor or reviewer can run `python run_all.py` and get a complete picture of project health in one command.
 
 ### 2. `run_benchmark_wrapper.py` — Benchmark-Only Wrapper
 
-Added: `scripts/run_benchmark_wrapper.py`
+Added: `run_benchmark_wrapper.py` (project root)
 
 What it does:
 
@@ -86,7 +86,7 @@ The project is at the very beginning of validation. The documentation now accura
 Run the benchmark:
 
 ```bash
-python scripts/run_all.py
+python run_all.py
 ```
 
 This will confirm whether random THENGPT weights produce any measurable recall signal on the synthetic task. Until this runs, the project is code that compiles and passes unit tests but has no evidence that the THEN memory mechanism works. Nothing else — not more docs, not more architecture refinements, not scaling plans — matters until this gate is passed.

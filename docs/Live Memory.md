@@ -12,7 +12,7 @@
   - **Phases Covered**: Pretraining → Customization → Training → Evaluation → Interface Deployment.  
   - **Personalization**: Tailored for your Cairo setup (12GB VRAM / 30GB RAM rig). ADHD-friendly: Modular steps, checklists.  
 - **Obsidian Tags**: #AILiveMemory #MasterPlan #THEN #Qwen3 #NanoChat #FullPipeline  
-- **Related Docs**: [General_old.md](General_old.md), [Preparation Wrap-Up](0-Preparation-Wrap-Up.md), [THEN Report](Project-Report-THEN.md), [NanoChat Analysis](NanoChat-Analysis.md), [Kaggle Workflow](Kaggle-NanoChat-Workflow.md)  
+- **Related Docs**: [causal_memory_validation.md](concepts/causal_memory_validation.md), [live_memory_refined_thesis.md](concepts/live_memory_refined_thesis.md), [early_validation_and_scaling_plan.md](plan/early_validation_and_scaling_plan.md)  
 - **Assumptions & Validations**: See Section 2. This doc is your "routine bible"—print/PDF for desk reference; update via Obsidian links.  
 
 ---
@@ -81,7 +81,7 @@ Deep-reviewed thread; corrected where needed (e.g., param sizes). — **All vali
 
 1. **Setup & Fork** (code complete).  
    - Clone: `cd ~/projects; git clone https://github.com/karpathy/nanochat.git nanochat-gpt2`.  
-   - Fork on GitHub (@MoZayed007/nanochat-then-fork).  
+   - Fork on GitHub (<https://github.com/mozayed007/THEN-nano>).  
    - Mod `gpt.py`: Insert THENGPT subclass. **(code written, not trained)**  
    - Gen synthetic data: Run `python gen_synthetic_data.py` with 10K episodes. **(generator written, data not validated for training)**  
 

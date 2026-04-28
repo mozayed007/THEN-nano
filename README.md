@@ -11,7 +11,8 @@
 **Learn More**:
 
 * [Conceptual Guide: The THEN Architecture](docs/concepts/then_architecture_public.md) - How we solve AI amnesia using a "Notebook" analogy.
-* [Technical Critique](docs/critique/critique_loop_2.md) - Honest analysis of current prototype limitations.
+* [Technical Critique](docs/critique/critique_loop_5.md) - Honest analysis of current prototype limitations.
+* [Full Documentation Index](docs/Live%20Memory.md) - Master plan and project overview.
 
 ---
 
@@ -70,14 +71,16 @@ This fork implements the "Ingest, Don't Train" workflow for episodic memory. Ins
 To verify the Live Memory flow (state persistence, saving/loading), run the included test suite:
 
 ```bash
+python run_all.py
+# or individual tests:
 python -m tests.test_live_memory
 ```
 
-*Note: High recall accuracy requires a fully pretrained THENGPT model. The tests currently verify the mechanical correctness of the state pipeline.*
+*Note: High recall accuracy requires a fully pretrained THENGPT model. The tests currently verify the mechanical correctness of the state pipeline. No training has been run. THENGPT weights are random.*
 
 ### Critical Analysis & Roadmap
 
-See [docs/critique/critique_loop_2.md](docs/critique/critique_loop_2.md) for a detailed resource, cost, and architectural analysis.
+See [docs/critique/critique_loop_5.md](docs/critique/critique_loop_5.md) for a detailed critique of the current prototype state.
 Key findings:
 
 * **Cost**: Moving memory to Disk/NVMe (Stage 2) is essential to reduce cost from $0.37/user/hr to $0.0001/user/hr.

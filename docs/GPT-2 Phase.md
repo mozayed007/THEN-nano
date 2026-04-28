@@ -13,7 +13,7 @@
   - **Current Reality**: Code architecture complete. THENGPT subclass, ingesters, and benchmark scaffold are written. No training has ever been executed. All metrics below are targets, not results.  
   - **Hardware**: Local 12GB VRAM (tests: 4-6GB target, batch=2-4); Kaggle T4x2 (full train: ~1-2hrs estimated, untested).  
 - **Obsidian Tags**: #AILiveMemory #GPT2Phase #NanoChatReal #THEN #BaselineProto #DeepReview  
-- **Related Docs**: [Master Plan](Master-Plan.md), [NanoChat Repo Review](NanoChat-Actual-Review.md), [THEN Details](THEN-Details.md)  
+- **Related Docs**: [Live Memory Master Plan](../Live%20Memory.md), [THEN Integration Threads](../THEN%20Integration%20Threads.md)  
 - **Assumptions & Validations** (Ultra-Reviewed): GPT-2 124M params (depth-26 canonical); NanoChat auto-hypers (width/heads/LR from depth) yield optimal; THEN overhead 5-10% target (sparse/Hebbian, not profiled); Synthetic data (10K episodes) hypothesized sufficient for proto recall (>70%). Risks: OOM—contingency batch=1 (code-level); Conflicts—test py_compile (code passes). Validated via repo: No external DBs; KV-cache in engine.py aids state.  
 
 ---
@@ -164,7 +164,7 @@ The originally documented speculative numbers (Recall 0.55 → 0.78, Forgetting 
 
 ## 4. Phase Outputs (Not Yet Produced)
 
-- **Repo Fork**: <https://github.com/MoZayed007/nanochat-then-fork> (Mods: THENGPT code, synthetic data gen) — **code only**  
+- **Repo Fork**: <https://github.com/mozayed007/THEN-nano> (Mods: THENGPT code, synthetic data gen) — **code only**  
 - **Checkpoints**: `runs/gpt2-then-kaggle-d26/final.pt` — **not yet produced**  
 - **Data**: `synthetic-cairo-episodes.txt` — **generator written, not validated for training**  
 - **Evals**: Metrics table — **pending first training run**  
