@@ -8,10 +8,17 @@ Usage: python -m scripts.ingest --model_path outputs/d8/model_000100.pt --data_p
 import os
 import torch
 import argparse
-from nanochat.tokenizer import get_tokenizer
-from nanochat.checkpoint_manager import load_checkpoint, build_model
-from nanochat.memory_manager import DiskTieredMemory
+from nanochat.checkpoint_manager import build_model
+from nanochat.memory_manager import DiskTieredMemory, buffer_sidecar_path, require_dat_path
 from nanochat.common import get_base_dir, print0
+from nanochat.gpt import THENGPT
+
+def _require_then_model(model, model_path):
+    if not isinstance(model, THENGPT):
+        raise TypeError(
+            f"{model_path} loaded as {type(model).__name__}, but Live Memory ingest requires a THENGPT checkpoint. "
+            "Train with `python -m scripts.base_train --model-class THENGPT ...` or use the portable_memory scripts for HF models."
+        )
 
 def ingest(args):
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -25,6 +32,7 @@ def ingest(args):
     # We use build_model to handle config patching and initialization
     # Note: Phase='eval' ensures dropout is off, etc.
     model, tokenizer, meta_data = build_model(checkpoint_dir, step, torch.device(device), phase="eval")
+    _require_then_model(model, args.model_path)
     model.eval() # Double check
 
     # 2. Prepare Data
@@ -42,6 +50,7 @@ def ingest(args):
     
     # Initialize hardware-native memory state
     output_path = args.output_path or os.path.join(get_base_dir(), "cairo_memory_state.dat")
+    require_dat_path(output_path)
     state = {
         'memory_manager': DiskTieredMemory(filepath=output_path, d_model=model.config.n_embd, device=device)
     }
@@ -59,8 +68,9 @@ def ingest(args):
     
     # We strip the memory manager out of the state dict and just save the leftover buffer
     buffer_state = {'buffer': state.get('buffer', None)}
-    buffer_path = output_path.replace(".dat", "_buffer.pt")
+    buffer_path = buffer_sidecar_path(output_path)
     torch.save(buffer_state, buffer_path)
+    state['memory_manager'].close()
     
     print0(f"Disk memory stream saved to {output_path}")
     print0(f"Leftover buffer state saved to {buffer_path}")

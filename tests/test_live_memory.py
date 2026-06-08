@@ -3,7 +3,7 @@ import tempfile
 import torch
 import unittest
 from nanochat.gpt import GPTConfig, THENGPT
-from nanochat.memory_manager import DiskTieredMemory
+from nanochat.memory_manager import DiskTieredMemory, buffer_sidecar_path
 from nanochat.common import COMPUTE_DTYPE
 
 class TestLiveMemoryFlow(unittest.TestCase):
@@ -19,6 +19,7 @@ class TestLiveMemoryFlow(unittest.TestCase):
         )
         self.model = THENGPT(self.config)
         self.model.to(self.device)
+        self.model.init_weights()
         self.model.cos = self.model.cos.to(COMPUTE_DTYPE)
         self.model.sin = self.model.sin.to(COMPUTE_DTYPE)
         self.model.eval()
@@ -65,20 +66,20 @@ class TestLiveMemoryFlow(unittest.TestCase):
     def test_disk_tiered_memory_roundtrip(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             path = os.path.join(tmpdir, "state.dat")
-            memory = DiskTieredMemory(filepath=path, max_traces=8, d_model=64, device=self.device)
-            trace = torch.zeros(1, 64, dtype=torch.float32)
-            trace[0, 7] = 1.0
-            memory.append(trace)
-            memory.save()
+            with DiskTieredMemory(filepath=path, max_traces=8, d_model=64, device=self.device) as memory:
+                trace = torch.zeros(1, 64, dtype=torch.float32)
+                trace[0, 7] = 1.0
+                memory.append(trace)
+                memory.save()
 
-            reloaded = DiskTieredMemory(filepath=path, max_traces=8, d_model=64, device=self.device)
-            self.assertEqual(reloaded.head, 1)
+            with DiskTieredMemory(filepath=path, max_traces=8, d_model=64, device=self.device) as reloaded:
+                self.assertEqual(reloaded.head, 1)
 
-            query = trace.unsqueeze(1)
-            context = reloaded.retrieve(query, top_k=1, chunk_size=1)
+                query = trace.unsqueeze(1)
+                context = reloaded.retrieve(query, top_k=1, chunk_size=1)
 
-            self.assertEqual(context.shape, query.shape)
-            self.assertTrue(torch.allclose(context.squeeze(1), trace, atol=1e-5, rtol=1e-4))
+                self.assertEqual(context.shape, query.shape)
+                self.assertTrue(torch.allclose(context.squeeze(1), trace, atol=1e-5, rtol=1e-4))
 
     def test_save_load_consistency(self):
         """Test that state can be saved and loaded identically."""
@@ -99,6 +100,11 @@ class TestLiveMemoryFlow(unittest.TestCase):
         # Cleanup
         if os.path.exists(path):
             os.remove(path)
+
+    def test_memory_sidecar_requires_dat_path(self):
+        self.assertEqual(buffer_sidecar_path("state.dat"), "state.buffer.pt")
+        with self.assertRaises(ValueError):
+            buffer_sidecar_path("state.pt")
 
 if __name__ == "__main__":
     unittest.main()

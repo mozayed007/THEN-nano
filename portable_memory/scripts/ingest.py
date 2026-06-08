@@ -11,7 +11,7 @@ import os
 import torch
 import argparse
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from portable_memory.memory_manager import DiskTieredMemory
+from portable_memory.memory_manager import DiskTieredMemory, adapter_sidecar_path, buffer_sidecar_path, require_dat_path
 from portable_memory.attention_hooks import install_memory_hooks
 
 def ingest(args):
@@ -48,6 +48,7 @@ def ingest(args):
         raise ValueError("Could not automatically identify Decoder layers in model structure.")
         
     output_path = args.output_path or "portable_memory_state.dat"
+    require_dat_path(output_path)
     memory_state = {
         'memory_manager': DiskTieredMemory(filepath=output_path, d_model=model.config.hidden_size, device=device),
         'buffer': torch.empty(1, 0, model.config.hidden_size, device=device, dtype=model.dtype)
@@ -79,11 +80,17 @@ def ingest(args):
     
     # We strip the memory manager out of the state dict and just save the leftover buffer
     buffer_state = {'buffer': memory_state.get('buffer', None)}
-    buffer_path = output_path.replace(".dat", "_buffer.pt")
+    buffer_path = buffer_sidecar_path(output_path)
     torch.save(buffer_state, buffer_path)
+    adapter_path = adapter_sidecar_path(output_path)
+    torch.save(model.then_modules.state_dict(), adapter_path)
+    memory_state['memory_manager'].close()
+    for handle in handles:
+        handle.remove()
     
     print(f"Disk memory stream saved to {output_path}")
     print(f"Leftover buffer state saved to {buffer_path}")
+    print(f"Portable memory adapter saved to {adapter_path}")
 
 
 if __name__ == "__main__":

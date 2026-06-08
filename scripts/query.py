@@ -8,11 +8,25 @@ Usage: python -m scripts.query --model_path outputs/d8/model_000100.pt --state_p
 import os
 import torch
 import argparse
-from nanochat.tokenizer import get_tokenizer
 from nanochat.checkpoint_manager import build_model
-from nanochat.memory_manager import DiskTieredMemory
+from nanochat.memory_manager import DiskTieredMemory, buffer_sidecar_path, require_dat_path
 from nanochat.engine import KVCache
 from nanochat.common import print0
+from nanochat.gpt import THENGPT
+
+def _legacy_buffer_path(state_path):
+    return state_path.replace(".dat", "_buffer.pt")
+
+def _first_existing_buffer_path(state_path):
+    candidates = [buffer_sidecar_path(state_path), _legacy_buffer_path(state_path)]
+    return next((path for path in candidates if os.path.exists(path)), candidates[0])
+
+def _require_then_model(model, model_path):
+    if not isinstance(model, THENGPT):
+        raise TypeError(
+            f"{model_path} loaded as {type(model).__name__}, but Live Memory query requires a THENGPT checkpoint. "
+            "Train with `python -m scripts.base_train --model-class THENGPT ...` or use the portable_memory scripts for HF models."
+        )
 
 def query(args):
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -22,11 +36,13 @@ def query(args):
     checkpoint_dir = os.path.dirname(args.model_path)
     step = int(os.path.basename(args.model_path).split('_')[1].split('.')[0])
     model, tokenizer, _ = build_model(checkpoint_dir, step, torch.device(device), phase="eval")
+    _require_then_model(model, args.model_path)
     model.eval()
 
     # 2. Load State
     print0(f"Loading memory stream from {args.state_path}...")
-    buffer_path = args.state_path.replace(".dat", "_buffer.pt")
+    require_dat_path(args.state_path)
+    buffer_path = _first_existing_buffer_path(args.state_path)
     
     state = {}
     if os.path.exists(buffer_path):
@@ -39,56 +55,59 @@ def query(args):
     # 3. Interactive Loop
     print0("\nReady for queries! (Type 'exit' to quit)")
     print0("-" * 50)
-    
+
     m = model.config
     dtype = torch.bfloat16 if device == "cuda" else torch.float32
     kv_model_kwargs = {"num_heads": m.n_kv_head, "head_dim": m.n_embd // m.n_head, "num_layers": m.n_layer}
-    
-    while True:
-        user_input = input("User: ")
-        if user_input.lower() in ["exit", "quit"]:
-            break
-            
-        tokens = tokenizer.encode(user_input, prepend="<|bos|>")
-        tokens = torch.tensor(tokens, dtype=torch.long, device=device).unsqueeze(0)
-        
-        print0("Assistant: ", end="", flush=True)
-        
-        with torch.inference_mode():
-            # Create fresh KV cache for this turn
-            kv_cache = KVCache(
-                batch_size=1,
-                seq_len=m.sequence_len,
-                device=device,
-                dtype=dtype,
-                **kv_model_kwargs,
-            )
-            
-            # --- PREFILL ---
-            # Process the whole prompt to populate KV cache and memory state buffer
-            logits, state = model(tokens, state=state, kv_cache=kv_cache, return_state=True)
-            next_token = logits[:, -1, :].argmax(dim=-1, keepdim=True)
-            
-            decoded = tokenizer.decode(next_token[0].tolist())
-            print(decoded, end="", flush=True)
-            
-            # --- DECODE ---
-            # Autoregressive generation using only 1 token per pass 
-            # Fixes the O(T^2) duplicate token ingestion bug
-            curr_token = next_token
-            for _ in range(args.max_new_tokens - 1):
-                logits, state = model(curr_token, state=state, kv_cache=kv_cache, return_state=True)
+
+    try:
+        while True:
+            user_input = input("User: ")
+            if user_input.lower() in ["exit", "quit"]:
+                break
+
+            tokens = tokenizer.encode(user_input, prepend="<|bos|>")
+            tokens = torch.tensor(tokens, dtype=torch.long, device=device).unsqueeze(0)
+
+            print0("Assistant: ", end="", flush=True)
+
+            with torch.inference_mode():
+                # Create fresh KV cache for this turn
+                kv_cache = KVCache(
+                    batch_size=1,
+                    seq_len=m.sequence_len,
+                    device=device,
+                    dtype=dtype,
+                    **kv_model_kwargs,
+                )
+
+                # --- PREFILL ---
+                # Process the whole prompt to populate KV cache and memory state buffer
+                logits, state = model(tokens, state=state, kv_cache=kv_cache, return_state=True)
                 next_token = logits[:, -1, :].argmax(dim=-1, keepdim=True)
-                
+
                 decoded = tokenizer.decode(next_token[0].tolist())
                 print(decoded, end="", flush=True)
-                
+
+                # --- DECODE ---
+                # Autoregressive generation using only 1 token per pass
+                # Fixes the O(T^2) duplicate token ingestion bug
                 curr_token = next_token
-                
-                if next_token.item() == tokenizer.eot_token_id:
-                    break
-                    
-        print("\n")
+                for _ in range(args.max_new_tokens - 1):
+                    logits, state = model(curr_token, state=state, kv_cache=kv_cache, return_state=True)
+                    next_token = logits[:, -1, :].argmax(dim=-1, keepdim=True)
+
+                    decoded = tokenizer.decode(next_token[0].tolist())
+                    print(decoded, end="", flush=True)
+
+                    curr_token = next_token
+
+                    if next_token.item() == tokenizer.eot_token_id:
+                        break
+
+            print("\n")
+    finally:
+        state['memory_manager'].close()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

@@ -529,8 +529,8 @@ class HybridTHENAttention(nn.Module):
         self.ratio = ratio
         self.chunk_size = chunk_size  # [THEN] Granularity control
         # Placeholder KDA/DSA - implement simple versions (KDA: gated decay, DSA: top-k sparse)
-        self.kda = nn.Linear(d_model, d_model, bias=False)  # Sim KDA compression
-        self.dsa = nn.Linear(d_model, d_model, bias=False)  # Sim DSA retrieval
+        self.kda = Linear(d_model, d_model, bias=False)  # Sim KDA compression
+        self.dsa = Linear(d_model, d_model, bias=False)  # Sim DSA retrieval
 
     def forward(self, x, state=None, layer_idx=0):
         if state is None: state = {'traces': []}
@@ -609,7 +609,6 @@ class THENGPT(GPT):
         s = 3**0.5 * n_embd**-0.5
         torch.nn.init.uniform_(self.then_attn.kda.weight, -s, s)
         torch.nn.init.uniform_(self.then_attn.dsa.weight, -s, s)
-        self.then_attn.to(dtype=COMPUTE_DTYPE)
 
     def num_scaling_params(self):
         wte = sum(p.numel() for p in self.transformer.wte.parameters())

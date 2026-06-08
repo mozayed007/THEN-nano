@@ -11,9 +11,15 @@ import os
 import torch
 import argparse
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from portable_memory.memory_manager import DiskTieredMemory
+from portable_memory.memory_manager import DiskTieredMemory, adapter_sidecar_path, buffer_sidecar_path, require_dat_path
 from portable_memory.model_wrapper import InferenceEngine
-from portable_memory.attention_hooks import install_memory_hooks
+
+def _legacy_buffer_path(state_path):
+    return state_path.replace(".dat", "_buffer.pt")
+
+def _first_existing_buffer_path(state_path):
+    candidates = [buffer_sidecar_path(state_path), _legacy_buffer_path(state_path)]
+    return next((path for path in candidates if os.path.exists(path)), candidates[0])
 
 def get_target_layers(model):
     """Helper to detect the target layers across standard HF models."""
@@ -37,29 +43,48 @@ def query(args):
     
     # 2. Load Memory State
     print(f"Loading memory stream from {args.state_path}...")
+    require_dat_path(args.state_path)
     memory_manager = DiskTieredMemory(filepath=args.state_path, max_traces=100_000, d_model=model.config.hidden_size, device=device)
     print(f"Loaded disk state with {memory_manager.head} traces.")
 
-    # 3. Create InferenceEngine Wrapper
-    # Instead of manual PREFILL vs DECODE logic in the script, the wrapper handles it.
-    engine = InferenceEngine(model, tokenizer, memory_manager, get_target_layers)
+    try:
+        # 3. Create InferenceEngine Wrapper
+        # Instead of manual PREFILL vs DECODE logic in the script, the wrapper handles it.
+        engine = InferenceEngine(model, tokenizer, memory_manager, get_target_layers)
+        adapter_path = adapter_sidecar_path(args.state_path)
+        if not os.path.exists(adapter_path):
+            raise FileNotFoundError(
+                f"Missing portable memory adapter sidecar: {adapter_path}. "
+                "Re-run portable_memory.scripts.ingest so query uses the same KDA/DSA projections as ingest."
+            )
+        adapter_state = torch.load(adapter_path, map_location=device)
+        model.then_modules.load_state_dict(adapter_state)
+        buffer_path = _first_existing_buffer_path(args.state_path)
+        if os.path.exists(buffer_path):
+            buffer_state = torch.load(buffer_path, map_location=device)
+            buffer = buffer_state.get('buffer', None)
+            if buffer is not None:
+                engine.memory_state['buffer'] = buffer.to(device=device, dtype=model.dtype)
+        print(f"Loaded portable memory adapter from {adapter_path}")
 
-    # 4. Interactive Loop
-    print("\nReady for queries! (Type 'exit' to quit)")
-    print("-" * 50)
-    
-    while True:
-        user_input = input("User: ")
-        if user_input.lower() in ["exit", "quit"]:
-            break
-            
-        print("Assistant: ", end="", flush=True)
-        
-        # Stream the generation
-        for token_text in engine.generate(user_input, max_new_tokens=args.max_new_tokens):
-            print(token_text, end="", flush=True)
-            
-        print("\n")
+        # 4. Interactive Loop
+        print("\nReady for queries! (Type 'exit' to quit)")
+        print("-" * 50)
+
+        while True:
+            user_input = input("User: ")
+            if user_input.lower() in ["exit", "quit"]:
+                break
+
+            print("Assistant: ", end="", flush=True)
+
+            # Stream the generation
+            for token_text in engine.generate(user_input, max_new_tokens=args.max_new_tokens):
+                print(token_text, end="", flush=True)
+
+            print("\n")
+    finally:
+        memory_manager.close()
 
 
 if __name__ == "__main__":

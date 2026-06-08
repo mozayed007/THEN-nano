@@ -4,6 +4,16 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 
+def require_dat_path(path: str) -> str:
+    root, ext = os.path.splitext(path)
+    if ext.lower() != ".dat":
+        raise ValueError(f"Memory stream path must end in .dat to avoid sidecar overwrite bugs: {path}")
+    return root
+
+def buffer_sidecar_path(state_path: str) -> str:
+    root = require_dat_path(state_path)
+    return f"{root}.buffer.pt"
+
 class DiskTieredMemory:
     """
     Hardware-Native Memory Manager for Live Memory (THEN).
@@ -41,6 +51,10 @@ class DiskTieredMemory:
         if created:
             self._persist_metadata()
 
+    def _ensure_open(self):
+        if self.memmap is None:
+            raise RuntimeError(f"Memory file is closed: {self.filepath}")
+
     def _persist_metadata(self):
         with open(self.meta_path, "w", encoding="utf-8") as f:
             json.dump({
@@ -70,6 +84,7 @@ class DiskTieredMemory:
         """
         Append a single trace or batch of traces (B, T, D) safely to disk.
         """
+        self._ensure_open()
         assert trace.size(-1) == self.d_model, f"Expected D={self.d_model}, got {trace.size(-1)}"
         
         # Flatten time and batch if necessary. Assuming (B, D) or (B, T, D)
@@ -98,6 +113,7 @@ class DiskTieredMemory:
         Retrieve context vector by streaming attention across disk.
         Query shape: (B, T, D) -> returns Context vector (B, T, D).
         """
+        self._ensure_open()
         if self.head == 0:
             return torch.zeros_like(query)
             
@@ -170,11 +186,40 @@ class DiskTieredMemory:
         return context
 
     def save(self):
-        """Memmap flushes automatically, but explicitly calling ensures os sync."""
+        """Flush the memmap and metadata to disk."""
+        self._ensure_open()
         self.memmap.flush()
         self._persist_metadata()
 
     def reload(self):
         """Updates internal views if file changed externally."""
+        if self.memmap is not None:
+            self.close()
         self.memmap = np.memmap(self.filepath, dtype=self.dtype, mode='r+', shape=self.shape)
         self._load_metadata()
+
+    def close(self):
+        """Flush and release the memmap handle so Windows can delete/move the file."""
+        memmap = getattr(self, "memmap", None)
+        if memmap is None:
+            return
+        memmap.flush()
+        self._persist_metadata()
+        mmap_obj = getattr(memmap, "_mmap", None)
+        self.memmap = None
+        del memmap
+        if mmap_obj is not None:
+            mmap_obj.close()
+
+    def __enter__(self):
+        self._ensure_open()
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        self.close()
+
+    def __del__(self):
+        try:
+            self.close()
+        except Exception:
+            pass
