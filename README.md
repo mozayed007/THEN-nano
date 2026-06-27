@@ -175,7 +175,6 @@ For questions about the base nanochat codebase, see [DeepWiki](https://deepwiki.
 - **[Andrej Karpathy](https://github.com/karpathy)** — nanochat and nanoGPT, the foundation this project builds on
 - **[modded-nanoGPT](https://github.com/KellerJordan/modded-nanogpt)** — leaderboard and gamification ideas
 - **[HuggingFace](https://huggingface.co/)** — FineWeb and SmolTalk datasets
-- **[Lambda](https://lambda.ai/service/gpu-cloud)** — compute infrastructure
 
 ## License
 
