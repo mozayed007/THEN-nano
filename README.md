@@ -1,10 +1,10 @@
-# LiveMem — Learned Episodic Memory for Frozen Language Models
+# LiveMem - Learned Episodic Memory for Frozen Language Models
 
 > **Status:** Architecture prototype. Code complete. No training has been run. All claimed mitigations are code-level, not empirically validated.
 
 **LiveMem** explores a hypothesis: that a language model's weights and its memory should be separate systems. Instead of retraining a model to learn new things, we give it a notebook.
 
-Built on top of [karpathy/nanochat](https://github.com/karpathy/nanochat) — the simplest experimental harness for training LLMs — this project extends it with the **THEN (Temporal History Episodic Network)** architecture: a learned external memory layer that lets a frozen model write, store, and retrieve episodic state without touching its weights.
+Built on top of [karpathy/nanochat](https://github.com/karpathy/nanochat) - the simplest experimental harness for training LLMs - this project extends it with the **THEN (Temporal History Episodic Network)** architecture: a learned external memory layer that lets a frozen model write, store, and retrieve episodic state without touching its weights.
 
 **Author:** Muhammad Z. Ahmed ([@MoZayed007](https://github.com/MoZayed007))
 
@@ -14,15 +14,15 @@ Built on top of [karpathy/nanochat](https://github.com/karpathy/nanochat) — th
 
 Standard LLMs have three options for incorporating new information:
 
-1. **Continued pretraining / SFT** — slow, expensive, prone to catastrophic forgetting, hard to target per-user.
-2. **RAG** — practical but keeps memory outside the model's learned dynamics, creates latency and prompt pressure.
-3. **Tool-based memory** — manual, prompting-dependent, not a natural part of the model's forward pass.
+1. **Continued pretraining / SFT** - slow, expensive, prone to catastrophic forgetting, hard to target per-user.
+2. **RAG** - practical but keeps memory outside the model's learned dynamics, creates latency and prompt pressure.
+3. **Tool-based memory** - manual, prompting-dependent, not a natural part of the model's forward pass.
 
 LiveMem proposes a fourth path:
 
-1. **Train once** — the model learns the *mechanism* of memory (how to compress, store, and retrieve traces).
-2. **Ingest into frozen state** — new information is written to external state via forward passes, not gradient updates.
-3. **Query with state** — the model reads its own memory during inference.
+1. **Train once** - the model learns the *mechanism* of memory (how to compress, store, and retrieve traces).
+2. **Ingest into frozen state** - new information is written to external state via forward passes, not gradient updates.
+3. **Query with state** - the model reads its own memory during inference.
 
 If this works, user-specific memory becomes a **state management problem**, not a model update problem.
 
@@ -34,15 +34,15 @@ The THEN architecture adds lightweight modules to transformer blocks that simula
 Input → Encoder → Replay → Abstracter → Integrator → Neurogenesis → Output
 ```
 
-- **Encoder** — compresses input into memory traces
-- **Replay** — reactivates relevant traces during forward passes
-- **Abstracter** — consolidates raw traces into higher-level representations
-- **Integrator** — merges retrieved memory with current reasoning
-- **Neurogenesis** — manages trace lifecycle and capacity
+- **Encoder** - compresses input into memory traces
+- **Replay** - reactivates relevant traces during forward passes
+- **Abstracter** - consolidates raw traces into higher-level representations
+- **Integrator** - merges retrieved memory with current reasoning
+- **Neurogenesis** - manages trace lifecycle and capacity
 
 Two retrieval paths:
-- **KDA (Key-Driven Attention)** — semantic lookup by content
-- **DSA (Dynamic State Attention)** — temporal/contextual retrieval
+- **KDA (Key-Driven Attention)** - semantic lookup by content
+- **DSA (Dynamic State Attention)** - temporal/contextual retrieval
 
 The system includes a `portable_memory` module using PyTorch `forward_hooks` for drop-in compatibility with standard HuggingFace models.
 
@@ -155,13 +155,13 @@ See [nanochat's README](https://github.com/karpathy/nanochat) for full documenta
 See [docs/critique/critique_loop_5.md](docs/critique/critique_loop_5.md) for a detailed critique.
 
 Key findings:
-- **Cost**: Moving memory to Disk/NVMe is essential — from $0.37/user/hr to $0.0001/user/hr.
+- **Cost**: Moving memory to Disk/NVMe is essential - from $0.37/user/hr to $0.0001/user/hr.
 - **Architecture**: "Mean Retrieval" must be replaced with "Attention Retrieval" to avoid memory blurring.
 - **Validation**: The model has not yet been shown to use memory causally. The central claim remains unproven.
 
 ## Upstream: nanochat
 
-This project is built on **[karpathy/nanochat](https://github.com/karpathy/nanochat)** by Andrej Karpathy. Nanochat is the simplest experimental harness for training LLMs — designed to run on a single GPU node with minimal, hackable code covering tokenization, pretraining, finetuning, evaluation, inference, and a chat UI.
+This project is built on **[karpathy/nanochat](https://github.com/karpathy/nanochat)** by Andrej Karpathy. Nanochat is the simplest experimental harness for training LLMs - designed to run on a single GPU node with minimal, hackable code covering tokenization, pretraining, finetuning, evaluation, inference, and a chat UI.
 
 The upstream nanochat includes:
 - A **Time-to-GPT-2 leaderboard** for pretraining speedruns
@@ -172,9 +172,9 @@ For questions about the base nanochat codebase, see [DeepWiki](https://deepwiki.
 
 ## Acknowledgements
 
-- **[Andrej Karpathy](https://github.com/karpathy)** — nanochat and nanoGPT, the foundation this project builds on
-- **[modded-nanoGPT](https://github.com/KellerJordan/modded-nanogpt)** — leaderboard and gamification ideas
-- **[HuggingFace](https://huggingface.co/)** — FineWeb and SmolTalk datasets
+- **[Andrej Karpathy](https://github.com/karpathy)** - nanochat and nanoGPT, the foundation this project builds on
+- **[modded-nanoGPT](https://github.com/KellerJordan/modded-nanogpt)** - leaderboard and gamification ideas
+- **[HuggingFace](https://huggingface.co/)** - FineWeb and SmolTalk datasets
 
 ## License
 
