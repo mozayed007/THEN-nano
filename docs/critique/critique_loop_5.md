@@ -8,7 +8,7 @@
 
 The project crossed a Rubicon today.
 
-All documentation now honestly reflects the current state: code exists on disk, but no training has occurred and no results have been observed. Previously, 8 of 9 markdown files contained premature claims — fake `[x]` completions, speculative metrics, and misleading "COMPLETED" status banners that implied validation milestones the project never reached.
+All documentation now honestly reflects the current state: code exists on disk, but no training has occurred and no results have been observed. Previously, 8 of 9 markdown files contained premature claims  -  fake `[x]` completions, speculative metrics, and misleading "COMPLETED" status banners that implied validation milestones the project never reached.
 
 The correction was surgical and complete. The project now has a single, clear, and honest starting point.
 
@@ -17,7 +17,7 @@ The correction was surgical and complete. The project now has a single, clear, a
 - **8 documentation files fixed:** removed fabricated `[x]` checkboxes, aspirational metric values presented as results, and false "COMPLETED" status indicators
 - **Reality headers added:** every document now carries an explicit STATUS banner stating what is true versus what is code-only
 - **`run_all.py` created:** a single-command validation entry point that runs the full pipeline end to end
-- **Code/done distinction enforced:** all documents now distinguish "code written" from "trained and validated" — these were previously conflated throughout the repository
+- **Code/done distinction enforced:** all documents now distinguish "code written" from "trained and validated"  -  these were previously conflated throughout the repository
 
 ## What Improved
 
@@ -41,7 +41,7 @@ The model weights are random. Every architectural component exists in code, but 
 
 ### 2. The benchmark has never been executed
 
-The recall benchmark scaffold exists, but the three conditions — persistent, reset, shuffled — have produced zero numbers.
+The recall benchmark scaffold exists, but the three conditions  -  persistent, reset, shuffled  -  have produced zero numbers.
 
 ### 3. No causal recall proof exists
 
@@ -59,7 +59,7 @@ The dataloader uses packing; the THEN mechanism assumes contiguous episode struc
 
 - **The benchmark may show no signal on first run.** If the architecture is fundamentally wrong, no amount of iteration on the current design will produce a result.
 - **The benchmark may need task strengthening before signal emerges.** If the synthetic task is too easy or too hard, results will be uninterpretable regardless of architecture correctness.
-- **Without signal, the entire THEN thesis is in question.** The project's core claim — that persistent external state causes causally better recall — remains untested.
+- **Without signal, the entire THEN thesis is in question.** The project's core claim  -  that persistent external state causes causally better recall  -  remains untested.
 - **Document discipline must be maintained.** The correction was a one-time effort. Every new commit must preserve the code/done distinction or the repository will regress.
 
 ## What Can Be Claimed Now
@@ -84,4 +84,4 @@ The repository still should not claim:
 2. Inspect whether `then_persistent > then_reset` and `then_persistent > then_shuffled`. These are the only comparisons that matter.
 3. Treat this as the first real decision gate. If the persistent condition does not outperform both controls, the architecture needs diagnosis before any further work.
 4. If no signal: add trace diagnostics (attention patterns, memory read/write counts, retrieval distances) before redesigning any component.
-5. If signal: strengthen the task with more steps, temporal gaps between references, and distractor tokens — to test whether the mechanism scales beyond the minimal case.
+5. If signal: strengthen the task with more steps, temporal gaps between references, and distractor tokens  -  to test whether the mechanism scales beyond the minimal case.

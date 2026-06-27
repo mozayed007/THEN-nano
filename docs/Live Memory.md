@@ -7,13 +7,13 @@
 - **Author**: Muhammad Z. Ahmed (@MoZayed007)  
 - **Date**: February 08, 2026 (Generated: 12:00 AM EET)  
 - **Version**: 1.0 (Final Synthesis)  
-- **Project Overview**: This all-in-one master plan consolidates our entire discussion thread into a actionable blueprint for the AI Live Memory system. It evolves from neuroscience-inspired memory types (episodic, semantic, procedural, working) and the revolutionary **THEN (Temporal-Hippocampal Embedding Network)** architecture—simulating hippocampal/MTL dynamics internally to cure LLM "anterograde amnesia." We start with GPT-2-scale prototyping (NanoChat for basics), transition to Qwen3-8B (efficient, multilingual scaling), and culminate in a NanoChat-like interface for interactive testing.  
+- **Project Overview**: This all-in-one master plan consolidates our entire discussion thread into a actionable blueprint for the AI Live Memory system. It evolves from neuroscience-inspired memory types (episodic, semantic, procedural, working) and the revolutionary **THEN (Temporal-Hippocampal Embedding Network)** architecture - simulating hippocampal/MTL dynamics internally to cure LLM "anterograde amnesia." We start with GPT-2-scale prototyping (NanoChat for basics), transition to Qwen3-8B (efficient, multilingual scaling), and culminate in a NanoChat-like interface for interactive testing.  
   - **Core Goal**: Build a model-agnostic, stateful learner with real-time consolidation/replay, no external DBs.  
   - **Phases Covered**: Pretraining → Customization → Training → Evaluation → Interface Deployment.  
   - **Personalization**: Tailored for your Cairo setup (12GB VRAM / 30GB RAM rig). ADHD-friendly: Modular steps, checklists.  
 - **Obsidian Tags**: #AILiveMemory #MasterPlan #THEN #Qwen3 #NanoChat #FullPipeline  
 - **Related Docs**: [causal_memory_validation.md](concepts/causal_memory_validation.md), [live_memory_refined_thesis.md](concepts/live_memory_refined_thesis.md), [early_validation_and_scaling_plan.md](plan/early_validation_and_scaling_plan.md)  
-- **Assumptions & Validations**: See Section 2. This doc is your "routine bible"—print/PDF for desk reference; update via Obsidian links.  
+- **Assumptions & Validations**: See Section 2. This doc is your "routine bible" - print/PDF for desk reference; update via Obsidian links.  
 
 ---
 
@@ -29,7 +29,7 @@ This plan operationalizes our thread: From amnesia analogy → THEN design (with
 4. **Evaluation** (Memory-specific metrics).  
 5. **Interface** (NanoChat-like UI for Qwen3 demos).  
 
-**Expected Outcomes**: A persistent Qwen3-THEN model with 25-40% better multi-turn retention; Arabic/Cairo-personalized episodes; open-source ready. — **All pending training validation.**
+**Expected Outcomes**: A persistent Qwen3-THEN model with 25-40% better multi-turn retention; Arabic/Cairo-personalized episodes; open-source ready.  -  **All pending training validation.**
 
 **Current Reality**: Code architecture is written and imports work. All THEN modules, HybridTHENAttention, ingesters, and benchmark scaffold exist. No training has ever been executed. THENGPT weights are random. Memory mechanism has zero empirical validation.
 
@@ -39,33 +39,33 @@ This plan operationalizes our thread: From amnesia analogy → THEN design (with
 
 ### 1.1 Core Concepts from Thread
 
-- **Amnesia Problem**: LLMs/VLMs (e.g., GPT-2, Qwen3) are "smart but forgetful"—static weights + limited context mimic anterograde amnesia. Solution: Internal memory via THEN.  
+- **Amnesia Problem**: LLMs/VLMs (e.g., GPT-2, Qwen3) are "smart but forgetful" - static weights + limited context mimic anterograde amnesia. Solution: Internal memory via THEN.  
 - **Memory Types** (Neuroscience-Inspired):  
   - Episodic: Timestamped events (hippocampus binding).  
   - Semantic: Fact graphs (MTL abstraction).  
   - Procedural: Habit rules (Hebbian updates).  
   - Working: Dynamic buffers (prefrontal fusion).  
 - **THEN Architecture**: Lightweight modules (5-10% overhead) embedded in transformer blocks: Encoder → Replay → Abstracter → Integrator → Neurogenesis. Stateful forward passes form/consolidate traces.  
-- **Hybrid Attention (Option C)**: Layer-wise interleaving (3:1 KDA:DSA) for theta-rhythmic encoding/retrieval—simulates hippocampal cycles; targets O(N) efficiency.  
+- **Hybrid Attention (Option C)**: Layer-wise interleaving (3:1 KDA:DSA) for theta-rhythmic encoding/retrieval - simulates hippocampal cycles; targets O(N) efficiency.  
 - **Model Path**: GPT-2 (NanoChat proto) → Qwen3-8B (scale: 8B params, 128K context, multilingual).  
 - **Tools/Workflow**: Local mods (PyTorch) → GitHub fork → Kaggle train (T4x2, 30hr quota) → Interface (Gradio/NanoChat UI).  
 - **Hardware**: Your 12GB VRAM rig (local tests: 4-6GB); Kaggle for trains (32GB total).  
 
 ### 1.2 Key Assumptions & Validations
 
-Deep-reviewed thread; corrected where needed (e.g., param sizes). — **All validation statuses are code-level assumptions. Nothing has been empirically verified.**
+Deep-reviewed thread; corrected where needed (e.g., param sizes).  -  **All validation statuses are code-level assumptions. Nothing has been empirically verified.**
 
 | Assumption | Validation | Status |
 |------------|------------|--------|
 | **Model Sizes**: Qwen3-8B ~8B params (not 7B mix-up). | Confirmed via HF docs/arXiv (Feb 2026 release). | Valid (docs) |
 | **VRAM Fits**: 4-5GB quantized on your rig; 20GB max for Kaggle. | nvidia-smi estimates in thread sketches. | Valid (calculations) |
 | **THEN Overhead**: 5-10% params/compute. | Code sketches: Sparse ops; Hebbian gradient-free. | Code-level, not profiled |
-| **Efficiency**: O(N) via Option C; 25-40% retention gain. | Derived from article + HiMeS-inspired evals. | Not validated — requires training |
+| **Efficiency**: O(N) via Option C; 25-40% retention gain. | Derived from article + HiMeS-inspired evals. | Not validated  -  requires training |
 | **Quotas**: Kaggle 30hr/week GPU free. | Current policy (2026 stable). | Valid (platform) |
 | **Multilingual**: Qwen3 strong in Arabic for Cairo episodes. | HF benchmarks: 85% Arabic MMLU. | Valid (reported) |
 | **No External Deps**: THEN internal (no DBs). | Core design; state in model.state_dict(). | Code-level |
 
-**Risks**: OOM on Kaggle—mitigate with batch=2 (code-level). Interference—orthogonal subspaces in code (code-level, not verified).
+**Risks**: OOM on Kaggle - mitigate with batch=2 (code-level). Interference - orthogonal subspaces in code (code-level, not verified).
 
 ---
 
@@ -95,7 +95,7 @@ Deep-reviewed thread; corrected where needed (e.g., param sizes). — **All vali
    - Full run: `--depth=12 --epochs=1`.  
    - Eval: `python core_eval.py` + custom forgetting metrics.  
 
-**Milestone**: Baseline checkpoint — **not yet produced**. Assumptions: NanoChat runs unmodified except subclass (untested).
+**Milestone**: Baseline checkpoint  -  **not yet produced**. Assumptions: NanoChat runs unmodified except subclass (untested).
 
 ### Phase 2: Customization for Qwen3 – Scale THEN
 
@@ -114,7 +114,7 @@ Deep-reviewed thread; corrected where needed (e.g., param sizes). — **All vali
    - Hook replay: Trigger on salience >1.0; log state['traces'].  
    - **Check**: Recall test: 85% fidelity target (untested).  
 
-**Milestone**: Qwen3-THEN ready in code — **not yet validated**.
+**Milestone**: Qwen3-THEN ready in code  -  **not yet validated**.
 
 ### Phase 3: Training Pipeline – Local to Kaggle
 
@@ -132,7 +132,7 @@ Deep-reviewed thread; corrected where needed (e.g., param sizes). — **All vali
 3. **Full Kaggle Train** [not run].  
    - Notebook: Clone fork; Train: `trainer.train()` with batch=4, epochs=3.  
 
-**Milestone**: Trained model zip — **not yet produced**.
+**Milestone**: Trained model zip  -  **not yet produced**.
 
 ### Phase 4: Evaluation & Refinements – Metrics & Ablations
 
@@ -146,11 +146,11 @@ Deep-reviewed thread; corrected where needed (e.g., param sizes). — **All vali
    - Code: Extend NanoChat `core_eval.py` for Qwen. **(code written, never executed)**  
    - Ablate Option C: Train vanilla vs. interleaved; Compare gains. **(ablations not run)**  
 
-2. **Debug/Refine** [not applicable — no results to debug].  
+2. **Debug/Refine** [not applicable  -  no results to debug].  
    - Profile: `torch.profiler` for VRAM/latency.  
    - Neurogenesis test: Simulate load>50 traces → Expand params.  
 
-**Milestone**: Eval report — **not yet produced**. Assumptions: 20-50% gains are targets only, not confirmed.
+**Milestone**: Eval report  -  **not yet produced**. Assumptions: 20-50% gains are targets only, not confirmed.
 
 ### Phase 5: Interface Deployment – NanoChat-Style UI for Qwen3
 
@@ -166,7 +166,7 @@ Deep-reviewed thread; corrected where needed (e.g., param sizes). — **All vali
 2. **Polish & Deploy** [not applicable].  
    - Host: Gradio public (free) or local Streamlit.  
 
-**Milestone**: Live demo link — **not yet produced**.
+**Milestone**: Live demo link  -  **not yet produced**.
 
 ---
 
@@ -177,9 +177,9 @@ Deep-reviewed thread; corrected where needed (e.g., param sizes). — **All vali
 - OOM: Drop batch/seq_len; Use CPU offload. **(code mitigations written, not tested)**  
 - Quota Exhaust: Fallback to local subsample (slower).  
 - Arabic Fidelity: Fine-tune extra on Cairo data if <80%.  
-- **Pretraining Gap**: Without stateful pretraining, the model might ignore memory. **Mitigation**: Implemented Truncated BPTT in `base_train.py` (2026-02-13) — **code-level only, not validated through training**.  
-- **Memory Blurring**: Averaging traces destroys detail. **Mitigation**: Replaced `torch.mean` with Dot-Product Attention (2026-02-13) — **code-level only, not validated through training**.  
-- **Model Portability**: Modifying the source code of every model is unscalable. **Mitigation**: Abstracted THEN into a PyTorch-hook based `portable_memory` module, making it drop-in compatible with standard HuggingFace wrappers (2026-02-22) — **code-level only, not validated through training**.  
+- **Pretraining Gap**: Without stateful pretraining, the model might ignore memory. **Mitigation**: Implemented Truncated BPTT in `base_train.py` (2026-02-13)  -  **code-level only, not validated through training**.  
+- **Memory Blurring**: Averaging traces destroys detail. **Mitigation**: Replaced `torch.mean` with Dot-Product Attention (2026-02-13)  -  **code-level only, not validated through training**.  
+- **Model Portability**: Modifying the source code of every model is unscalable. **Mitigation**: Abstracted THEN into a PyTorch-hook based `portable_memory` module, making it drop-in compatible with standard HuggingFace wrappers (2026-02-22)  -  **code-level only, not validated through training**.  
 
 **Contingencies**: If Qwen3 issues, revert to Gemma-3-9B (similar size).  
 
@@ -188,9 +188,9 @@ Deep-reviewed thread; corrected where needed (e.g., param sizes). — **All vali
 - Tools: PyTorch 2.2+, Transformers 4.40+ (valid).  
 - Data: 100M-1B tokens sufficient for proto (untested).  
 - Gains: 25-40% from Option C (target, not confirmed).  
-- **State Granularity**: Buffering logic ensures 1 trace per chunk (16 tokens) regardless of batch size — **code-level, not validated**.  
+- **State Granularity**: Buffering logic ensures 1 trace per chunk (16 tokens) regardless of batch size  -  **code-level, not validated**.  
 
-This is your executable blueprint—code architecture is ready. Training has not yet begun.
+This is your executable blueprint - code architecture is ready. Training has not yet begun.
 
 **End of Master Plan**  
 *Last Updated: Apr 28, 2026. Status corrected to reflect pre-training reality.*

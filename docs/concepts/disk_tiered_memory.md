@@ -2,7 +2,7 @@
 
 ## Overview
 
-Live Memory (THEN phase) shifts away from traditional Vector Databases (like Pinecone or Chroma) to maintain a pure, zero-dependency, local-first architecture. Instead of holding unbounded lists of episodic traces in VRAM—which inevitably leads to catastrophic Out-Of-Memory (OOM) errors during long LLM sessions—the project implements a **Hardware-Native Memory Manager** (`nanochat.memory_manager.DiskTieredMemory`).
+Live Memory (THEN phase) shifts away from traditional Vector Databases (like Pinecone or Chroma) to maintain a pure, zero-dependency, local-first architecture. Instead of holding unbounded lists of episodic traces in VRAM - which inevitably leads to catastrophic Out-Of-Memory (OOM) errors during long LLM sessions - the project implements a **Hardware-Native Memory Manager** (`nanochat.memory_manager.DiskTieredMemory`).
 
 ## The Concept
 

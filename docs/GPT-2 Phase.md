@@ -7,14 +7,14 @@
 - **Author**: Muhammad Z. Ahmed (@MoZayed007)  
 - **Date**: February 08, 2026 (Generated: 12:15 AM EET); Corrected Apr 28, 2026  
 - **Version**: 1.2 (Reality correction: all metrics are targets, not results)  
-- **Project Context**: This exhaustive, self-contained document details **Phase 1** of the Master Plan: Prototyping the Temporal-Hippocampal Embedding Network (THEN) on GPT-2-scale models using the actual NanoChat repository (<https://github.com/karpathy/nanochat>, reviewed in full as of Feb 2026). NanoChat is Karpathy's minimalist, hackable framework for end-to-end LLM training on single/multi-GPU nodes, emphasizing cognitive simplicity via one dial (`--depth`) for compute-optimal models. It covers tokenization, pretraining, SFT, eval, inference, and ChatGPT-like UI—perfect for validating THEN's internal memory mechanics (episodic traces, semantic abstraction, replay with Hybrid Option C interleaving) before Qwen3 scaling.  
-  - **Repo Deep Dive Summary**: NanoChat (~1K LoC PyTorch) trains GPT-2 capability (CORE score >0.256) in ~3hrs on 8xH100 (~$72; spot ~$20). Leaderboard gamifies "time-to-GPT-2." Key files: `gpt.py` (transformer model, easy subclass for THEN), `scripts/base_train.py` (pretrain), `core_eval.py` (CORE/bpb/MMLU), `engine.py` (KV-cache infer), `ui.html` (web chat). Deps: PyTorch, wandb, uv. No factories—pure funcs for mods. Structure: `nanochat/` (core), `scripts/` (entrypoints), `tasks/` (evals like MMLU/GSM8K), `runs/` (bash like speedrun.sh).  
+- **Project Context**: This exhaustive, self-contained document details **Phase 1** of the Master Plan: Prototyping the Temporal-Hippocampal Embedding Network (THEN) on GPT-2-scale models using the actual NanoChat repository (<https://github.com/karpathy/nanochat>, reviewed in full as of Feb 2026). NanoChat is Karpathy's minimalist, hackable framework for end-to-end LLM training on single/multi-GPU nodes, emphasizing cognitive simplicity via one dial (`--depth`) for compute-optimal models. It covers tokenization, pretraining, SFT, eval, inference, and ChatGPT-like UI - perfect for validating THEN's internal memory mechanics (episodic traces, semantic abstraction, replay with Hybrid Option C interleaving) before Qwen3 scaling.  
+  - **Repo Deep Dive Summary**: NanoChat (~1K LoC PyTorch) trains GPT-2 capability (CORE score >0.256) in ~3hrs on 8xH100 (~$72; spot ~$20). Leaderboard gamifies "time-to-GPT-2." Key files: `gpt.py` (transformer model, easy subclass for THEN), `scripts/base_train.py` (pretrain), `core_eval.py` (CORE/bpb/MMLU), `engine.py` (KV-cache infer), `ui.html` (web chat). Deps: PyTorch, wandb, uv. No factories - pure funcs for mods. Structure: `nanochat/` (core), `scripts/` (entrypoints), `tasks/` (evals like MMLU/GSM8K), `runs/` (bash like speedrun.sh).  
   - **Phase Goal**: Fork/mod NanoChat → Insert THEN (THENGPT subclass) → Gen Cairo/Arabic synthetic data → Local quick-train/test → Kaggle full baseline → Eval retention gains (20-40% target). Output: Stateful checkpoint.  
   - **Current Reality**: Code architecture complete. THENGPT subclass, ingesters, and benchmark scaffold are written. No training has ever been executed. All metrics below are targets, not results.  
   - **Hardware**: Local 12GB VRAM (tests: 4-6GB target, batch=2-4); Kaggle T4x2 (full train: ~1-2hrs estimated, untested).  
 - **Obsidian Tags**: #AILiveMemory #GPT2Phase #NanoChatReal #THEN #BaselineProto #DeepReview  
 - **Related Docs**: [Live Memory Master Plan](../Live%20Memory.md), [THEN Integration Threads](../THEN%20Integration%20Threads.md)  
-- **Assumptions & Validations** (Ultra-Reviewed): GPT-2 124M params (depth-26 canonical); NanoChat auto-hypers (width/heads/LR from depth) yield optimal; THEN overhead 5-10% target (sparse/Hebbian, not profiled); Synthetic data (10K episodes) hypothesized sufficient for proto recall (>70%). Risks: OOM—contingency batch=1 (code-level); Conflicts—test py_compile (code passes). Validated via repo: No external DBs; KV-cache in engine.py aids state.  
+- **Assumptions & Validations** (Ultra-Reviewed): GPT-2 124M params (depth-26 canonical); NanoChat auto-hypers (width/heads/LR from depth) yield optimal; THEN overhead 5-10% target (sparse/Hebbian, not profiled); Synthetic data (10K episodes) hypothesized sufficient for proto recall (>70%). Risks: OOM - contingency batch=1 (code-level); Conflicts - test py_compile (code passes). Validated via repo: No external DBs; KV-cache in engine.py aids state.  
 
 ---
 
@@ -22,7 +22,7 @@
 
 This phase leverages NanoChat's real structure (minimal/hackable: `gpt.py` for model mods, `base_train.py` for pretrain, `chat_web.py` for UI) to embed THEN: Subclass GPT as THENGPT → Interleave Option C (3:1 KDA:DSA for theta-rhythms) post-attn → Hook episodic/semantic/replay in forward → Gen multilingual synthetic (Cairo/Arabic episodes) → Train depth-12 baseline (~25M params, ~10min local target) → Scale to depth-26 (~1hr Kaggle target) → Eval via extended `core_eval.py` (CORE + custom forgetting).  
 
-**Deep Insights from Repo**: NanoChat's "one-dial" depth auto-tunes everything (e.g., depth=12: n_embd=768, heads=12, LR=6e-4)—ideal for THEN scaling without config hell. Deps minimal (uv sync); Custom: Edit `gpt.py` → Rerun scripts.  
+**Deep Insights from Repo**: NanoChat's "one-dial" depth auto-tunes everything (e.g., depth=12: n_embd=768, heads=12, LR=6e-4) - ideal for THEN scaling without config hell. Deps minimal (uv sync); Custom: Edit `gpt.py` → Rerun scripts.  
 
 **Code Status**: THENGPT subclass written and imports work. Synthetic data generator written. Ingest/query scripts written. Benchmark scaffold written. No training executed. All output metrics below are TARGETS.  
 
@@ -32,7 +32,7 @@ This phase leverages NanoChat's real structure (minimal/hackable: `gpt.py` for m
 
 ### 1.1 Actual Repo Structure & Content (Ultra-Extracted)
 
-From full GitHub crawl (README verbatim + file tree): NanoChat is a "simplest experimental harness" for single-GPU LLM lifecycle (tokenization → pretrain → SFT → eval → infer/UI). No configs/factories—hackable pure PyTorch. Purpose: Democratize GPT-2 (~$43K in 2019 → <$100 now) via `--depth` dial (auto-hypers: Width/heads/LR/decay from depth). Leaderboard: Time-to-GPT-2 (CORE>0.256; current best ~2.76hrs 8xH100).  
+From full GitHub crawl (README verbatim + file tree): NanoChat is a "simplest experimental harness" for single-GPU LLM lifecycle (tokenization → pretrain → SFT → eval → infer/UI). No configs/factories - hackable pure PyTorch. Purpose: Democratize GPT-2 (~$43K in 2019 → <$100 now) via `--depth` dial (auto-hypers: Width/heads/LR/decay from depth). Leaderboard: Time-to-GPT-2 (CORE>0.256; current best ~2.76hrs 8xH100).  
 
 **Full File Tree** (Exact from Repo):  
 
@@ -105,7 +105,7 @@ From full GitHub crawl (README verbatim + file tree): NanoChat is a "simplest ex
 
 ### Code Status Summary
 
-All code blocks below are written and pass `py_compile`. No training runs have been initiated. The day-by-day routine below describes the intended execution order — it has not been followed. Steps marked [not run] require a trained model to execute.
+All code blocks below are written and pass `py_compile`. No training runs have been initiated. The day-by-day routine below describes the intended execution order  -  it has not been followed. Steps marked [not run] require a trained model to execute.
 
 ### THENGPT Subclass (Code Written)
 
@@ -164,15 +164,15 @@ The originally documented speculative numbers (Recall 0.55 → 0.78, Forgetting 
 
 ## 4. Phase Outputs (Not Yet Produced)
 
-- **Repo Fork**: <https://github.com/mozayed007/THEN-nano> (Mods: THENGPT code, synthetic data gen) — **code only**  
-- **Checkpoints**: `runs/gpt2-then-kaggle-d26/final.pt` — **not yet produced**  
-- **Data**: `synthetic-cairo-episodes.txt` — **generator written, not validated for training**  
-- **Evals**: Metrics table — **pending first training run**  
-- **UI Demo**: `python scripts/chat_web.py --model=final.pt` — **not runnable without trained model**  
+- **Repo Fork**: <https://github.com/mozayed007/THEN-nano> (Mods: THENGPT code, synthetic data gen)  -  **code only**  
+- **Checkpoints**: `runs/gpt2-then-kaggle-d26/final.pt`  -  **not yet produced**  
+- **Data**: `synthetic-cairo-episodes.txt`  -  **generator written, not validated for training**  
+- **Evals**: Metrics table  -  **pending first training run**  
+- **UI Demo**: `python scripts/chat_web.py --model=final.pt`  -  **not runnable without trained model**  
 
 ### Handover to Qwen3 Phase
 
-- Transfer: Load GPT-2 state as Qwen init (`qwen_then.load_state_dict(gpt_state, strict=False)` — Subspaces align). **(code planned, not executed)**  
+- Transfer: Load GPT-2 state as Qwen init (`qwen_then.load_state_dict(gpt_state, strict=False)`  -  Subspaces align). **(code planned, not executed)**  
 - Master Plan: Mark Phase 1 as code-complete only.  
 
 ### Ultra-Review Notes

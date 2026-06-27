@@ -1,6 +1,6 @@
 # Independent Critique and Concerns: Live Memory in `nanochat-then`
 
-> **UPDATE 2026-04-28:** Concern #4 (disk metadata reload bug) was addressed in the March 22 changelog — `DiskTieredMemory` now persists `head`, `max_traces`, `d_model`, and `dtype` in a sidecar JSON file (`metadata.json`). **However, this fix has not been validated through actual training or end-to-end pipeline execution.** It exists purely at the code level.
+> **UPDATE 2026-04-28:** Concern #4 (disk metadata reload bug) was addressed in the March 22 changelog  -  `DiskTieredMemory` now persists `head`, `max_traces`, `d_model`, and `dtype` in a sidecar JSON file (`metadata.json`). **However, this fix has not been validated through actual training or end-to-end pipeline execution.** It exists purely at the code level.
 
 ## Purpose
 

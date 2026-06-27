@@ -42,7 +42,7 @@ We must modify the pretraining loop to simulate the "Live Memory" condition.
 * **Objective:** Force the model to recall information from the *previous* batch (which is now in `state`) to predict tokens in the *current* batch.
 * **Status:** Code exists in `scripts/base_train.py` (2026-02-13). State persistence and gradient detachment are implemented in code. **Zero training steps have been run. The model weights are random.**
 
-### Stage 2: Scalable Memory Infrastructure (Hardware-Native) — NOT STARTED
+### Stage 2: Scalable Memory Infrastructure (Hardware-Native)  -  NOT STARTED
 
 We will reject external Vector DBs and plugins to maintain a pure, zero-dependency architecture. We will manage the memory hierarchy directly, treating the OS and hardware as the database.
 
@@ -55,14 +55,14 @@ We will reject external Vector DBs and plugins to maintain a pure, zero-dependen
   * **OS Paging:** Rely on the operating system's virtual memory management (via `mmap`) to handle caching of large trace files transparently.
   * **Zero-Copy:** Use zero-copy tensor views to read from disk directly into tensor processing.
 
-### Stage 3: Mechanism-Specific Tasks — NOT STARTED
+### Stage 3: Mechanism-Specific Tasks  -  NOT STARTED
 
 Train on tasks that explicitly require memory, not just generic text.
 
 * **Task:** "Passkey Retrieval" (Hide a key at $t=0$, ask for it at $t=10000$).
 * **Task:** "Personality Consistency" (Reward the model for maintaining consistent preferences over long contexts).
 
-### Stage 4: Real-World Deployment — NOT STARTED
+### Stage 4: Real-World Deployment  -  NOT STARTED
 
 * **Privacy:** Since memory is a file (`state.pt`), we can offer "Incognito Mode" (don't save traces) or "Memory Wipe" (delete file) features trivially.
 * **Personalization:** If the mechanism is validated and the storage path is reliable, one frozen model could potentially serve many users with separate state files.

@@ -18,7 +18,7 @@ Since we cannot train on the Cairo episodes (that would be cheating/baking it in
     * The model learns to use KDA (Compression) to store information in `state['traces']`.
     * The model learns to use DSA (Retrieval) to query `state['traces']` to predict future tokens.
     * *Note for Prototype*: We might need a "Memory Gym" dataset where the answer *always* requires looking back N tokens, forcing the model to rely on the memory module.
-4. **Outcome**: A `pretrained_then.pt` model with frozen weights. **(NOT YET PRODUCED — no training has been run)**
+4. **Outcome**: A `pretrained_then.pt` model with frozen weights. **(NOT YET PRODUCED  -  no training has been run)**
 
 ## Phase 2: Ingestion (The "Live" Phase)
 
@@ -69,7 +69,7 @@ Since we cannot train on the Cairo episodes (that would be cheating/baking it in
 
 * [code only] Update `plan0.md` (this file).
 
-### 3. Execution (Prototype) — **NONE OF THESE HAVE BEEN RUN**
+### 3. Execution (Prototype)  -  **NONE OF THESE HAVE BEEN RUN**
 
 * **Step 1** [not run]: Pretrain `THENGPT` on a small slice of FineWeb (or generic text) just to initialize the weights reasonably.
 

@@ -47,6 +47,6 @@ python -m tests.test_live_memory
 
 ## Current Status
 
-- **Mechanical Verification:** Code implemented and smoke tests passing (`tests/test_live_memory.py`). "Passing" means the code does not crash on random weights — it validates state plumbing, save/load round-trips, and import chains. It does NOT validate that the memory mechanism actually works. These are mechanical smoke tests, not functional memory tests.
+- **Mechanical Verification:** Code implemented and smoke tests passing (`tests/test_live_memory.py`). "Passing" means the code does not crash on random weights  -  it validates state plumbing, save/load round-trips, and import chains. It does NOT validate that the memory mechanism actually works. These are mechanical smoke tests, not functional memory tests.
 - **Data Coherence:** Implemented in `dev/gen_cairo_data.py` (persistent user state). Code-level only; no training run has consumed this data.
 - **Recall Accuracy:** Pending full pretraining of the `THENGPT` model. Not yet executed.

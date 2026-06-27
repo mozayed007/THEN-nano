@@ -2,7 +2,7 @@
 
 ## Summary
 
-A comprehensive cross-reference audit of all THEN memory module documentation revealed that 8 out of 9 `.md` files contained false or premature claims. The project docs described training as complete, listed unmeasured metrics as if measured, and marked code-only scaffolding as finished work. This session corrected every affected document, wrote a single-command validation runner (`run_all.py`), and established that the project is at the very beginning of validation — the THENGPT architecture code exists and passes unit tests, but weights are random because no training has ever run.
+A comprehensive cross-reference audit of all THEN memory module documentation revealed that 8 out of 9 `.md` files contained false or premature claims. The project docs described training as complete, listed unmeasured metrics as if measured, and marked code-only scaffolding as finished work. This session corrected every affected document, wrote a single-command validation runner (`run_all.py`), and established that the project is at the very beginning of validation  -  the THENGPT architecture code exists and passes unit tests, but weights are random because no training has ever run.
 
 ## Why This Change Was Needed
 
@@ -13,7 +13,7 @@ The documentation layer had drifted far from reality across four failure modes:
 3. **Status overstatement in top-level docs**: `Live Memory.md` described the project as operational with resolved risks. `critique_and_roadmap.md` marked Stage 1 "COMPLETED" when code exists but weights are random.
 4. **Ambiguous verification language**: `live_memory_eval.md` used "mechanical verification passing" without clarifying this referred to unit tests, not training validation. `early_validation_and_scaling_plan.md` listed "completed" tasks referring only to code scaffolding.
 
-A reader arriving fresh would believe training had run and the architecture had empirical backing. The reality: code architecture is solid, all imports work, all unit tests pass — but THENGPT has never been trained.
+A reader arriving fresh would believe training had run and the architecture had empirical backing. The reality: code architecture is solid, all imports work, all unit tests pass  -  but THENGPT has never been trained.
 
 ## Documentation Changes
 
@@ -34,7 +34,7 @@ A reader arriving fresh would believe training had run and the architecture had 
 
 - Added `STATUS:` or `REALITY:` headers to every affected document
 - Replaced all `[x]` checkboxes with `[code only, not trained]` where applicable
-- Removed every speculative number — all replaced with `TBD` or `PENDING`
+- Removed every speculative number  -  all replaced with `TBD` or `PENDING`
 - Added explicit "code written, not executed" disclaimers throughout
 - Removed the irrelevant daily/weekly routine section from the master plan
 - Updated `critique_and_roadmap.md` with dated 2026-04-28 preamble explaining the audit
@@ -42,7 +42,7 @@ A reader arriving fresh would believe training had run and the architecture had 
 
 ## Code Changes
 
-### 1. `run_all.py` — Single-Command Validation Runner
+### 1. `run_all.py`  -  Single-Command Validation Runner
 
 Added: `run_all.py` (project root)
 
@@ -55,7 +55,7 @@ What it does:
 
 Intent: a new contributor or reviewer can run `python run_all.py` and get a complete picture of project health in one command.
 
-### 2. `run_benchmark_wrapper.py` — Benchmark-Only Wrapper
+### 2. `run_benchmark_wrapper.py`  -  Benchmark-Only Wrapper
 
 Added: `run_benchmark_wrapper.py` (project root)
 
@@ -89,4 +89,4 @@ Run the benchmark:
 python run_all.py
 ```
 
-This will confirm whether random THENGPT weights produce any measurable recall signal on the synthetic task. Until this runs, the project is code that compiles and passes unit tests but has no evidence that the THEN memory mechanism works. Nothing else — not more docs, not more architecture refinements, not scaling plans — matters until this gate is passed.
+This will confirm whether random THENGPT weights produce any measurable recall signal on the synthetic task. Until this runs, the project is code that compiles and passes unit tests but has no evidence that the THEN memory mechanism works. Nothing else  -  not more docs, not more architecture refinements, not scaling plans  -  matters until this gate is passed.

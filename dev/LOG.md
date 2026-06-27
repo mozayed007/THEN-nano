@@ -75,7 +75,7 @@ Replaced `torch.amp.autocast` throughout the codebase with explicit dtype manage
 
 ### Motivation
 
-autocast is "magic we don't control" — it silently decides which ops run in which precision via internal allowlists. For this codebase, autocast was doing very little: the only thing it actually cast was `nn.Linear` weights from fp32 to bf16 for matmuls. `F.rms_norm`, `F.cross_entropy`, and Flash Attention all handle their own dtypes already. By making precision explicit, we gain fine-grained control (e.g. can experiment with fp32 norms) and eliminate an unnecessary layer of abstraction.
+autocast is "magic we don't control"  -  it silently decides which ops run in which precision via internal allowlists. For this codebase, autocast was doing very little: the only thing it actually cast was `nn.Linear` weights from fp32 to bf16 for matmuls. `F.rms_norm`, `F.cross_entropy`, and Flash Attention all handle their own dtypes already. By making precision explicit, we gain fine-grained control (e.g. can experiment with fp32 norms) and eliminate an unnecessary layer of abstraction.
 
 ### What changed
 
@@ -106,7 +106,7 @@ autocast is "magic we don't control" — it silently decides which ops run in wh
 
 ## 2026-03-04: Dataset upgrade: FineWeb-EDU 100B → ClimbMix 400B
 
-Switched the pretraining dataset from FineWeb-EDU 100B to ClimbMix 400B. This is by far the single biggest improvement to nanochat's GPT-2 speedrun time, bringing it down from **2 hours 46 minutes to 2 hours 1 minute** — a 27% reduction.
+Switched the pretraining dataset from FineWeb-EDU 100B to ClimbMix 400B. This is by far the single biggest improvement to nanochat's GPT-2 speedrun time, bringing it down from **2 hours 46 minutes to 2 hours 1 minute**  -  a 27% reduction.
 
 ### What is ClimbMix?
 
@@ -123,7 +123,7 @@ ClimbMix 400B is a curated 400B-token pretraining mixture hosted at `karpathy/cl
 
 ### Context
 
-This is the sixth attempt at beating FineWeb-EDU on CORE score — the previous five all failed (see entries on 2026-02-17, 2026-02-10, 2026-01-12 below). ClimbMix is the first dataset to convincingly surpass it, and the margin is large enough to also shrink the model from d26 to d24.
+This is the sixth attempt at beating FineWeb-EDU on CORE score  -  the previous five all failed (see entries on 2026-02-17, 2026-02-10, 2026-01-12 below). ClimbMix is the first dataset to convincingly surpass it, and the margin is large enough to also shrink the model from d26 to d24.
 
 ---
 
@@ -144,7 +144,7 @@ Follows DeepSeekV3 and using torchtitan as reference:
 - **Auxiliary-loss-free load balancing** (DeepSeekV3's expert bias nudging)
 - **Iso-FLOP sizing**: `expert_hidden_dim = round(4 * dim / (top_k + num_shared) / 128) * 128`, so active FLOPs per token match the dense MLP
 - **`torch._grouped_mm`** for dispatching tokens to experts in a single kernel (instead of a Python for-loop)
-- **3D expert weight tensors** `(num_experts, hidden, dim)` — Muon's Polar Express operates on the last two dims, so each expert is independently orthogonalized
+- **3D expert weight tensors** `(num_experts, hidden, dim)`  -  Muon's Polar Express operates on the last two dims, so each expert is independently orthogonalized
 - **Active parameter counting** for scaling laws (only `top_k + shared` experts, not all 8)
 
 ### What was easy
@@ -158,7 +158,7 @@ Follows DeepSeekV3 and using torchtitan as reference:
 
 - **`torch._grouped_mm` quirks**: requires bf16 (not fp32), column-major right operand, int32 cumulative offsets. The API is undocumented and only discoverable by trial and error.
 - **Token count padding**: torchtitan pads each expert's token count to alignment multiples (8 for bf16) for better grouped_mm throughput. We implemented this with both a pure PyTorch approach and a copy of torchtitan's Triton kernel. Both compiled cleanly (0 graph breaks), but with ~65K tokens across 8 experts, each expert already gets ~8K tokens which is well-aligned. The padding overhead (gather/scatter) actually regressed MFU from 35% to 33%. Reverted.
-- **FP8 + MoE**: `torch._grouped_mm` does NOT support FP8. There's a separate `torch._scaled_grouped_mm` API that requires per-row scaling (not per-tensor like our `Float8Linear`). The backward pass for weight gradients needs per-group column-wise scaling, which torchao implements with custom Triton kernels. We investigated thoroughly (see `dev/moe_fp8.md`) but did not implement — would require either depending on `torchao.prototype` (unstable) or writing ~200 lines of custom autograd + quantization code. Partial FP8 support exists: the shared expert's `nn.Linear` layers do get converted, but the routed experts (3D `nn.Parameter`) stay in bf16.
+- **FP8 + MoE**: `torch._grouped_mm` does NOT support FP8. There's a separate `torch._scaled_grouped_mm` API that requires per-row scaling (not per-tensor like our `Float8Linear`). The backward pass for weight gradients needs per-group column-wise scaling, which torchao implements with custom Triton kernels. We investigated thoroughly (see `dev/moe_fp8.md`) but did not implement  -  would require either depending on `torchao.prototype` (unstable) or writing ~200 lines of custom autograd + quantization code. Partial FP8 support exists: the shared expert's `nn.Linear` layers do get converted, but the routed experts (3D `nn.Parameter`) stay in bf16.
 
 ### Results
 
@@ -170,7 +170,7 @@ Follows DeepSeekV3 and using torchtitan as reference:
 
 - **FP8 for routed experts**: Use `torch._scaled_grouped_mm` with a custom `_Float8GroupedMatmul` autograd function, with bf16 fallback for weight gradient (avoiding the per-group column-wise Triton kernels).
 
-What's really needed is a fused "FlashMoE" kernel that handles routing + expert dispatch + matmul in one shot (like FlashAttention did for attention), with all the needed features. This doesn't exist yet. Rawdogging MoE with current PyTorch primitives is painful — lots of sorting, gathering, scattering, and layout wrangling around the actual compute.
+What's really needed is a fused "FlashMoE" kernel that handles routing + expert dispatch + matmul in one shot (like FlashAttention did for attention), with all the needed features. This doesn't exist yet. Rawdogging MoE with current PyTorch primitives is painful  -  lots of sorting, gathering, scattering, and layout wrangling around the actual compute.
 
 ### Verdict
 
@@ -292,7 +292,7 @@ self.w3 = Linear(hidden_dim, n_embd)  # down
 x = w3(silu(w1(x)) * w2(x))
 ```
 
-Tested at both d12 and d24 (GPT-2 scale). Worse on all measures — step efficiency, wall clock time, and FLOPs. ReLU² remains superior for nanochat. **Not adopted.**
+Tested at both d12 and d24 (GPT-2 scale). Worse on all measures  -  step efficiency, wall clock time, and FLOPs. ReLU² remains superior for nanochat. **Not adopted.**
 
 ---
 
@@ -545,7 +545,7 @@ Clearly, the Kaplan-style ratios are most consistent and produce stable ~0.5 exp
 
 ## 2026-01-19 to 2026-01-22: Optimizer Hyperparameter Sweep
 
-Ran ~320 experiments across 6 rounds, scaling from d12→d16→d20 to find optimal optimizer hyperparameters. Added granular per-component control to `setup_optimizers()` — separate LRs and betas for embedding, unembedding, value_embeds, resid_lambdas, x0_lambdas, and Muon matrix params.
+Ran ~320 experiments across 6 rounds, scaling from d12→d16→d20 to find optimal optimizer hyperparameters. Added granular per-component control to `setup_optimizers()`  -  separate LRs and betas for embedding, unembedding, value_embeds, resid_lambdas, x0_lambdas, and Muon matrix params.
 
 ### What We Swept
 - Learning rates for all 6 parameter groups

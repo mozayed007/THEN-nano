@@ -6,7 +6,7 @@
 
 ### Summary
 
-Extracted the core elements of the Live Memory architecture—previously deeply coupled into the bespoke `THENGPT` model—into a new completely standalone, model-agnostic `portable_memory` module via PyTorch Hooks. This allows the disk-tiered streaming memory to be dropped into any open-source or open-weights HuggingFace model dynamically.
+Extracted the core elements of the Live Memory architecture - previously deeply coupled into the bespoke `THENGPT` model - into a new completely standalone, model-agnostic `portable_memory` module via PyTorch Hooks. This allows the disk-tiered streaming memory to be dropped into any open-source or open-weights HuggingFace model dynamically.
 
 ### Changes
 

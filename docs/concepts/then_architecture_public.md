@@ -53,6 +53,6 @@ Instead of updating the neural network's parameters (which requires a massive GP
 5. **Portable Implementation Path**: The current prototype includes PyTorch `forward_hooks` intended to wrap standard HuggingFace models without invasive source-code modifications.
 ---
 
-CURRENT STATUS (2026-04-28): The THEN architecture has been implemented as code modifications to nanochat with a portable hook-based path for HuggingFace models. All unit tests pass for mechanical plumbing. However, no model training has been executed — the architecture has not yet been shown to produce causal recall advantages in any benchmark. The `tiny_recall_benchmark.py` scaffold is the next step.
+CURRENT STATUS (2026-04-28): The THEN architecture has been implemented as code modifications to nanochat with a portable hook-based path for HuggingFace models. All unit tests pass for mechanical plumbing. However, no model training has been executed  -  the architecture has not yet been shown to produce causal recall advantages in any benchmark. The `tiny_recall_benchmark.py` scaffold is the next step.
 
 *This architecture is intended as a path from static weights toward a more stateful form of personalization without continuous retraining, but its practical advantages still require controlled validation.*

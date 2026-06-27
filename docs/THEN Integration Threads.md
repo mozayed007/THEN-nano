@@ -1,6 +1,6 @@
 # AI Live Memory: THEN Integration Threads - Architecture, Prototypes, Evaluation, and Training Guide
 
-> **STATUS 2026-04-28**: Architecture design and code integration complete. No model training has been executed. All metric targets are aspirational — none have been measured.
+> **STATUS 2026-04-28**: Architecture design and code integration complete. No model training has been executed. All metric targets are aspirational  -  none have been measured.
 
 ## Key Points
 - **Consolidated Structure**: This document merges placeholder content from Threads 3, 8, and 12 into a unified guide for the AI Live Memory project, focusing on the Temporal-Hippocampal Embedding Network (THEN) with hybrid attention (Option C: Layer-wise Interleaving). It adds a practical training section for prototyping on Kaggle GPUs, ensuring model-agnostic scalability and anti-amnesia features.
@@ -431,9 +431,9 @@ python -m scripts.chat_web
 # Comprehensive Survey: AI Live Memory THEN Development Framework
 
 ## Introduction to the Framework
-The AI Live Memory project represents a forward-looking effort to embed biologically inspired memory mechanisms into large language and vision-language models (LLMs/VLMs), addressing catastrophic forgetting through the Temporal-Hippocampal Embedding Network (THEN). Drawing from hippocampal and medial temporal lobe (MTL) simulations, THEN leverages hybrid attention mechanisms—specifically Option C: layer-wise interleaving of Knowledge Distillation Attention (KDA) for compression and Dense Sparse Attention (DSA) for retrieval—to enable scalable, anti-amnesic cognition. This survey consolidates placeholder documents from Threads 3, 8, and 12, originally drafted on February 07, 2026, into a cohesive framework. It extends the core project report by incorporating architectural visualizations, prototype implementations, rigorous evaluation protocols, and practical training guidance for resource-constrained environments like Kaggle GPUs.
+The AI Live Memory project represents a forward-looking effort to embed biologically inspired memory mechanisms into large language and vision-language models (LLMs/VLMs), addressing catastrophic forgetting through the Temporal-Hippocampal Embedding Network (THEN). Drawing from hippocampal and medial temporal lobe (MTL) simulations, THEN leverages hybrid attention mechanisms - specifically Option C: layer-wise interleaving of Knowledge Distillation Attention (KDA) for compression and Dense Sparse Attention (DSA) for retrieval - to enable scalable, anti-amnesic cognition. This survey consolidates placeholder documents from Threads 3, 8, and 12, originally drafted on February 07, 2026, into a cohesive framework. It extends the core project report by incorporating architectural visualizations, prototype implementations, rigorous evaluation protocols, and practical training guidance for resource-constrained environments like Kaggle GPUs.
 
-The framework emphasizes internal, model-agnostic storage subspaces (episodic, semantic, procedural, and working memory) without reliance on external databases, ensuring privacy and efficiency. Key innovations include Hebbian consolidation for trace strengthening, neurogenesis expanders for adaptive growth, and replay loops mimicking offline hippocampal processing. Aligned with 2026 open-source trends—such as Mixture-of-Experts (MoE) sparsity in models like Qwen3-235B and long-horizon reasoning in DeepSeek-V3.2—this approach targets 25-40% improvements in retention over vanilla transformers, particularly in multi-session, 250K+ token contexts.
+The framework emphasizes internal, model-agnostic storage subspaces (episodic, semantic, procedural, and working memory) without reliance on external databases, ensuring privacy and efficiency. Key innovations include Hebbian consolidation for trace strengthening, neurogenesis expanders for adaptive growth, and replay loops mimicking offline hippocampal processing. Aligned with 2026 open-source trends - such as Mixture-of-Experts (MoE) sparsity in models like Qwen3-235B and long-horizon reasoning in DeepSeek-V3.2 - this approach targets 25-40% improvements in retention over vanilla transformers, particularly in multi-session, 250K+ token contexts.
 
 **Metadata Consolidation**:  
 - **Author**: Muhammad Z. Ahmed (@MoZayed007).  
@@ -456,7 +456,7 @@ Prior original design documents (Obsidian vault, not in this repository) establi
 
 **Strengths Elaborated**: These visuals highlight API/MCP/SDK interfaces for plug-and-play integration, enabling continuous learning without full retraining. For instance, the sequence diagram captures outer-product Hebbian updates, where synaptic weights evolve as \( W \leftarrow W + \eta \cdot x y^T \) (x, y as pre/post-synaptic activations), fostering associative recall.  
 
-**Weaknesses and Refinements**: Lacking explicit hippocampal motifs—such as sharp-wave ripple (SWR) replay for consolidation—the originals underrepresent dynamic elements. No depiction of hybrid attention's rhythmic interleaving (e.g., KDA in early layers for sparse encoding, DSA in later for dense retrieval) limits scalability insights. Trends from 2026 benchmarks (e.g., MLPerf reports on MoE efficiency) demand visualizations of sparse experts handling 250K contexts without quadratic attention blowup.
+**Weaknesses and Refinements**: Lacking explicit hippocampal motifs - such as sharp-wave ripple (SWR) replay for consolidation - the originals underrepresent dynamic elements. No depiction of hybrid attention's rhythmic interleaving (e.g., KDA in early layers for sparse encoding, DSA in later for dense retrieval) limits scalability insights. Trends from 2026 benchmarks (e.g., MLPerf reports on MoE efficiency) demand visualizations of sparse experts handling 250K contexts without quadratic attention blowup.
 
 **Trend Alignment**: Post-2025 architectures, like GLM-4.7's adaptive reasoning, prioritize long-context handling. THEN's interleaving reduces effective FLOPs by 30-50% via sparsity, outperforming vanilla multi-head attention in retention tasks.
 
@@ -508,7 +508,7 @@ Leverage PyTorch 2.2+ with no additional installs. Base: Fork DeepSeek-V3.2 (4-b
 Simulates timestamped trace formation, binding context to temporal embeddings.  
 - **Architecture**: Sparse autoencoder (AE) compresses hidden states; embedding layer proxies seconds/day (scalable to full UTC via positional encodings).  
 - **Forward Logic**: Add pos_embeds + ts_emb to hidden_states; AE outputs sigmoid-gated trace (sparsity ~20% activations). Stored as state_dict buffer for persistence.  
-- **Biological Tie-In**: Mimics hippocampal indexing theory—episodes as conjunctive codes (timestamp + content).  
+- **Biological Tie-In**: Mimics hippocampal indexing theory - episodes as conjunctive codes (timestamp + content).  
 - **Efficiency**: Linear layers; <1% param overhead.
 
 #### Semantic Abstracter: MTL Extraction
